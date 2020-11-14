@@ -9,4 +9,6 @@ java -jar WebCrawler.jar (RecursionAmount) (URL)
  - RecursionAmount must be integer
  - Multiple URLs could be placed with a space seperator
  
- Requires JRE 14 to run
+Requires JRE 14 to run
+
+Libraries used: https://github.com/jhy/jsoup/
