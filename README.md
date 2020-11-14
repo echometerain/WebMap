@@ -1,6 +1,6 @@
 # WebMap
 
-A program that takes a webpage, takes all of its embeded links, and recursively derives more webpages, creating a map
+A program that takes a webpage, takes all of its embeded links, and recursively derives more webpages, creating a map.
 
 ## How to run
 
