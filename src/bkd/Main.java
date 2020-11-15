@@ -1,6 +1,6 @@
 package bkd;
 import java.io.*;
-import org.jsoup.*;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
@@ -9,6 +9,7 @@ public class Main {
 	static FileReader files;
 	static Queue<String> list = new LinkedList<>();
 	static HashMap<String, LinkedList<String>> map = new HashMap<>();
+	static String dir = System.getProperty("user.dir") + "/Saves";
 	public static void main(String[] args) throws IOException {
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
 		args = new String[3];
@@ -16,6 +17,9 @@ public class Main {
 		args[1] = s.readLine();
 		args[2] = s.readLine();
 		s.close();
+		if(!new File(dir).isDirectory()) {
+			new File(dir).mkdir();
+		}
 		switch(args[0]) {
 		case "--index":
 			int n = 0;
@@ -35,7 +39,7 @@ public class Main {
 			break;
 		}
 	}
-	static void index(int re) {
+	static void index(int re) throws IOException {
 		outer:
 		for(long i = 0; i < re; i++) {
 			try {
@@ -50,9 +54,9 @@ public class Main {
 					html = Jsoup.connect(turl).get();
 				} catch(Exception ex) {
 					System.out.println("Syntax Error: " + turl);
-					//i--;
-					//continue;
-					return;
+					i--;
+					continue;
+					//return;
 				}
 				for(Element e:html.select("a[href]")) {
 					String nlink = urlfix(urlmerge(e.attr("href"), turl));
@@ -70,13 +74,20 @@ public class Main {
 			}
 			System.out.print(i+"/"+re + " complete\r");
 		}
-		/*for(String e:map.keySet()) {
-			System.out.println(e);
+		new File(dir+"/index").mkdir();
+		for(String e:map.keySet()) {
+			new File(dir + "/index/"+e+".txt").createNewFile();
+			FileWriter writer = new FileWriter(dir + "/index/"+e+".txt");
 			for(String e2:map.get(e)) {
-				System.out.println(" |- " + e2);
+				writer.write(e2+" ");
 			}
-			System.out.println();
-		}*/
+			writer.close();
+		}
+		FileWriter w2 = new FileWriter(dir + "/queue.txt");
+		while(!list.isEmpty()) {
+			w2.write(list.poll());
+		}
+		w2.close();
 	}
 	static String urlmerge(String url, String lurl) {
 		if(url.length() == 0) return lurl;
