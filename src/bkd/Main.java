@@ -11,31 +11,33 @@ public class Main {
 	static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	public static void main(String[] args) throws IOException {
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
-		args = new String[4];
+		args = new String[3];
 		args[0] = s.readLine();
 		args[1] = s.readLine();
 		args[2] = s.readLine();
 		s.close();
 		switch(args[0]) {
 		case "--index":
-			index(args);
+			int n = 0;
+			try {
+				n = Integer.parseInt(args[1]);
+			}catch(NumberFormatException e) {
+				System.out.println("Repetition size must be a number");
+			}
+			for(int i = 2; i < args.length; i++) {
+				list.add(urlfix(args[i]));
+			}
+			index(n);
 			break;
 		case "--load":
-			
+			break;
+		case "--dir":
+			break;
 		}
 	}
-	static void index(String[] args) {
-		int n = 0;
-		try {
-			n = Integer.parseInt(args[1]);
-		}catch(NumberFormatException e) {
-			System.out.println("Repetition size must be a number");
-		}
-		for(int i = 2; i < args.length; i++) {
-			list.add(urlfix(args[i]));
-		}
+	static void index(int re) {
 		outer:
-		for(long i = 0; i < n; i++) {
+		for(long i = 0; i < re; i++) {
 			try {
 				String turl = list.poll();
 				if(list.poll() == null && i > 0)return;
@@ -48,11 +50,14 @@ public class Main {
 					html = Jsoup.connect(turl).get();
 				} catch(Exception ex) {
 					System.out.println("Syntax Error: " + turl);
-					continue;
+					//i--;
+					//continue;
+					return;
 				}
 				for(Element e:html.select("a[href]")) {
 					String nlink = urlfix(urlmerge(e.attr("href"), turl));
 					if(map.containsKey(nlink)) {
+						i--;
 						continue outer;
 					}
 					tlist.add(nlink);
@@ -63,32 +68,26 @@ public class Main {
 				System.out.println("Reached the end");
 				return;
 			}
-			System.out.print(i+"/"+n + " complete\r");
+			System.out.print(i+"/"+re + " complete\r");
 		}
-		for(String e:map.keySet()) {
+		/*for(String e:map.keySet()) {
 			System.out.println(e);
 			for(String e2:map.get(e)) {
 				System.out.println(" |- " + e2);
 			}
 			System.out.println();
-		}
+		}*/
 	}
 	static String urlmerge(String url, String lurl) {
 		if(url.length() == 0) return lurl;
 		String[] parts = lurl.split("/");
-		//System.out.println();
-		//System.out.println(lurl+ " "+url);
-		if(url.equals("../")) {
-			return parts[0] + "//" + parts[2];
-		}
+		System.out.println();
+		System.out.println(lurl+ " "+url);
 		if(url.charAt(0) == '#') {
-			if(lurl.charAt(lurl.length()-1) == '/') {
-				lurl = lurl.substring(0, lurl.length()-1);
-			}
+			//if(lurl.charAt(lurl.length()-1) == '/') {
+			//	lurl = lurl.substring(0, lurl.length()-1);
+			//}
 			return lurl+url;
-		}
-		if(lurl.charAt(lurl.length()-1) != '/') {
-			lurl = lurl + "/";
 		}
 		try {
 			if(url.startsWith("https")||url.startsWith("http:")) return url;
@@ -102,26 +101,46 @@ public class Main {
 		}
 		else if(url.charAt(0) == '.') {
 			if(url.startsWith("./")) {
-				//String[] parts = lurl.split("/");
-				//lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
+				if(parts.length>2 && parts[parts.length-1].contains(".")) {
+					lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
+				}
 				url = url.substring(2, url.length());
 			}
+			else if(url.startsWith("../../")) {
+				if(parts[parts.length-1].contains(".")) {
+					lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+parts[parts.length-2].length()+parts[parts.length-3].length()+3));
+				}
+				else {
+					lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+parts[parts.length-2].length()+2));
+				}
+				url = url.substring(6, url.length());
+			}
 			else if(url.startsWith("../")) {
-				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
+				if(parts[parts.length-1].contains(".")) {
+					lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+parts[parts.length-2].length()+2));
+				}
+				else {
+					lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
+				}
 				url = url.substring(3, url.length());
 			}
 			else return lurl;
 		}
+		if(lurl.charAt(lurl.length()-1) == '/') {
+			lurl = lurl.substring(0, lurl.length()-1);
+		}
+		if(url.length()>0 && url.charAt(0) != '/') {
+			url = "/"+url;
+		}
 		url = lurl + url;
-		//System.out.println(url);
+		System.out.println(url);
 		return url;
 	}
 	static String urlfix(String url) {
-		//if(url.charAt(0) != '/') {
-			//if(url.charAt(0) == 'h') url = url.substring(5);
-			//if(url.charAt(0) == ':') url = url.substring(1);
-		//}
-		String root = url.split("/")[2];
+		String root;
+		try {
+			root = url.split("/")[2];
+		}catch(Exception ex) {return url;}
 		if(root.split(".").length == 2) {
 			url = "//www."+url.substring(2);
 		}
