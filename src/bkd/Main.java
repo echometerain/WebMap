@@ -6,21 +6,32 @@ import org.jsoup.nodes.Element;
 
 import java.util.*;
 public class Main {
+	static FileReader files;
 	static Queue<String> list = new LinkedList<>();
 	static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	public static void main(String[] args) throws IOException {
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
-		args = new String[2];
+		args = new String[4];
 		args[0] = s.readLine();
 		args[1] = s.readLine();
+		args[2] = s.readLine();
 		s.close();
+		switch(args[0]) {
+		case "--index":
+			index(args);
+			break;
+		case "--load":
+			
+		}
+	}
+	static void index(String[] args) {
 		int n = 0;
 		try {
-			n = Integer.parseInt(args[0]);
+			n = Integer.parseInt(args[1]);
 		}catch(NumberFormatException e) {
 			System.out.println("Repetition size must be a number");
 		}
-		for(int i = 1; i < args.length; i++) {
+		for(int i = 2; i < args.length; i++) {
 			list.add(urlfix(args[i]));
 		}
 		outer:
