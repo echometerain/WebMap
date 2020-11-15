@@ -56,9 +56,9 @@ public class Main {
 					html = Jsoup.connect(turl).get();
 				} catch(Exception ex) {
 					System.out.println("Syntax Error: " + turl);
-					//i--;
-					//continue;
-					return;
+					i--;
+					continue;
+					//return;
 				}
 				for(Element e:html.select("a[href]")) {
 					String nlink = urlmerge(e.attr("href"), turl);
@@ -97,12 +97,9 @@ public class Main {
 	static String urlmerge(String url, String lurl) {
 		if(url.length() == 0) return lurl;
 		String[] parts = lurl.split("/");
-		System.out.println();
-		System.out.println(lurl+ " "+url);
+		//System.out.println();
+		//System.out.println(lurl+ " "+url);
 		if(url.charAt(0) == '#') {
-			//if(lurl.charAt(lurl.length()-1) == '/') {
-			//	lurl = lurl.substring(0, lurl.length()-1);
-			//}
 			return lurl+url;
 		}
 		try {
@@ -110,7 +107,6 @@ public class Main {
 			if(url.startsWith("mail:")) return lurl;
 			if(url.startsWith("http:")||url.startsWith("https:")) return url;
 			if(url.startsWith("//")) {
-				//url = Jsoup.connect(url).get().location();
 				return parts[0]+url;
 			}
 		}catch(Exception ignored) {}
@@ -148,7 +144,7 @@ public class Main {
 			url = "/"+url;
 		}
 		url = lurl + url;
-		System.out.println(url);
+		//System.out.println(url);
 		return url;
 	}
 }
