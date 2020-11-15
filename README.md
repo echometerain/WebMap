@@ -1,6 +1,6 @@
 # WebMap
 
-A program that takes a webpage, takes all of its embeded links, and recursively derives more webpages, creating a map.
+A program that takes a webpage, takes all of its embeded links, and recursively derives more webpages with BFS.
 
 ## How to run
 
@@ -14,4 +14,5 @@ Requires JRE 14 to run
 
 Libraries used:
  - https://github.com/jhy/jsoup/
- - https://github.com/jgraph/jgraphx
+
+Under the MIT license because I think jsoup said I had to.
