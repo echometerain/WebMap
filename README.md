@@ -4,8 +4,9 @@ A program that takes a webpage, takes all of its embeded links, and recursively 
 
 ## How to run
 
-java -jar WebCrawler.jar (RecursionAmount) (URL)
+java -jar WebCrawler.jar (Mode) (RecursionAmount) (URL)
   
+ - --index is the only Mode currently
  - RecursionAmount must be integer
  - Multiple URLs could be placed with a space seperator
  
