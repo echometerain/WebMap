@@ -100,28 +100,18 @@ public class Main {
 			lurl = parts[0]+"//"+parts[2];
 		}
 		else if(url.charAt(0) == '.') {
+			if(parts.length>2 && parts[parts.length-1].contains(".")) {
+				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
+			}
 			if(url.startsWith("./")) {
-				if(parts.length>2 && parts[parts.length-1].contains(".")) {
-					lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
-				}
 				url = url.substring(2, url.length());
 			}
 			else if(url.startsWith("../../")) {
-				if(parts[parts.length-1].contains(".")) {
-					lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+parts[parts.length-2].length()+parts[parts.length-3].length()+3));
-				}
-				else {
-					lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+parts[parts.length-2].length()+2));
-				}
+				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+parts[parts.length-2].length()+2));
 				url = url.substring(6, url.length());
 			}
 			else if(url.startsWith("../")) {
-				if(parts[parts.length-1].contains(".")) {
-					lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+parts[parts.length-2].length()+2));
-				}
-				else {
-					lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
-				}
+				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
 				url = url.substring(3, url.length());
 			}
 			else return lurl;
