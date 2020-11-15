@@ -80,8 +80,12 @@ public class Main {
 			lurl = lurl + "/";
 		}
 		try {
-			if(url.startsWith("https")||url.startsWith("http:")||url.startsWith("//")) return url;
-		}catch(StringIndexOutOfBoundsException ignored) {}
+			if(url.startsWith("https")||url.startsWith("http:")) return url;
+			if(url.startsWith("//")) {
+				url = Jsoup.connect(url).get().location();
+				return url;
+			}
+		}catch(Exception ignored) {}
 		if(url.charAt(0) == '/') {
 			lurl = parts[0]+"//"+parts[2];
 		}
