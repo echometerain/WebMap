@@ -37,8 +37,6 @@ public class Main {
 			break;
 		case "--load":
 			break;
-		case "--dir":
-			break;
 		}
 	}
 	static void index(int re) throws IOException {
@@ -54,6 +52,7 @@ public class Main {
 				Document html;
 				try {
 					html = Jsoup.connect(turl).get();
+					turl = html.location();
 				} catch(Exception ex) {
 					System.out.println("Syntax Error: " + turl);
 					i--;
@@ -74,7 +73,7 @@ public class Main {
 				System.out.println("Reached the end");
 				return;
 			}
-			System.out.print(i+"/"+re + " complete\r");
+			System.out.print(i+"/"+(re-1) + " complete\r");
 		}
 		System.out.print("Saving...\r");
 		new File(dir + "\\index.txt").createNewFile();
