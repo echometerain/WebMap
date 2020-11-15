@@ -1,5 +1,5 @@
 package bkd;
-//import java.io.*;
+import java.io.*;
 import org.jsoup.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,12 +8,12 @@ import java.util.*;
 public class Main {
 	static Queue<String> list = new LinkedList<>();
 	static HashMap<String, LinkedList<String>> map = new HashMap<>();
-	public static void main(String[] args) {// throws IOException {
-		//BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
-		//args = new String[2];
-		//args[0] = s.readLine();
-		//args[1] = s.readLine();
-		//s.close();
+	public static void main(String[] args) throws IOException {
+		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
+		args = new String[2];
+		args[0] = s.readLine();
+		args[1] = s.readLine();
+		s.close();
 		int n = 0;
 		try {
 			n = Integer.parseInt(args[0]);
@@ -24,7 +24,7 @@ public class Main {
 			list.add(urlfix(args[i]));
 		}
 		outer:
-		for(int i = 0; i < n; i++) {
+		for(long i = 0; i < n; i++) {
 			try {
 				String turl = list.poll();
 				if(list.poll() == null && i > 0)return;
@@ -52,7 +52,7 @@ public class Main {
 				System.out.println("Reached the end");
 				return;
 			}
-			System.out.print(i*100/n + "% \r");
+			System.out.print(i+"/"+n + " complete\r");
 		}
 		for(String e:map.keySet()) {
 			System.out.println(e);
@@ -70,22 +70,28 @@ public class Main {
 		if(url.equals("../")) {
 			return parts[0] + "//" + parts[2];
 		}
+		if(url.charAt(0) == '#') {
+			if(lurl.charAt(lurl.length()-1) == '/') {
+				lurl = lurl.substring(0, lurl.length()-1);
+			}
+			return lurl+url;
+		}
 		if(lurl.charAt(lurl.length()-1) != '/') {
 			lurl = lurl + "/";
 		}
 		try {
-			if(url.substring(0, 5).equals("https")||url.substring(0, 4).equals("http")||url.substring(0, 2).equals("//")) return url;
+			if(url.startsWith("https")||url.startsWith("http:")||url.startsWith("//")) return url;
 		}catch(StringIndexOutOfBoundsException ignored) {}
 		if(url.charAt(0) == '/') {
 			lurl = parts[0]+"//"+parts[2];
 		}
 		else if(url.charAt(0) == '.') {
-			if(url.substring(0, 2).equals("./")) {
+			if(url.startsWith("./")) {
 				//String[] parts = lurl.split("/");
 				//lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
 				url = url.substring(2, url.length());
 			}
-			else if(url.substring(0, 3).equals("../")) {
+			else if(url.startsWith("../")) {
 				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
 				url = url.substring(3, url.length());
 			}
