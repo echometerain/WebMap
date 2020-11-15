@@ -12,4 +12,6 @@ java -jar WebCrawler.jar (Mode) (RecursionAmount) (URL)
  
 Requires JRE 14 to run
 
-Libraries used: https://github.com/jhy/jsoup/
+Libraries used:
+ - https://github.com/jhy/jsoup/
+ - https://github.com/jgraph/jgraphx
