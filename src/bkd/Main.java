@@ -9,14 +9,16 @@ public class Main {
 	static FileReader files;
 	static Queue<String> list = new LinkedList<>();
 	static HashMap<String, LinkedList<String>> map = new HashMap<>();
-	static String dir = System.getProperty("user.dir") + "/Saves";
+	static String dir = System.getProperty("user.dir") + "\\Saves";
 	public static void main(String[] args) throws IOException {
+		/*
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
 		args = new String[3];
 		args[0] = s.readLine();
 		args[1] = s.readLine();
 		args[2] = s.readLine();
 		s.close();
+		*/
 		if(!new File(dir).isDirectory()) {
 			new File(dir).mkdir();
 		}
@@ -24,12 +26,12 @@ public class Main {
 		case "--index":
 			int n = 0;
 			try {
-				n = Integer.parseInt(args[1]);
+				n = Integer.parseInt(args[1])+1;
 			}catch(NumberFormatException e) {
 				System.out.println("Repetition size must be a number");
 			}
 			for(int i = 2; i < args.length; i++) {
-				list.add(urlfix(args[i]));
+				list.add(args[i]);
 			}
 			index(n);
 			break;
@@ -54,12 +56,12 @@ public class Main {
 					html = Jsoup.connect(turl).get();
 				} catch(Exception ex) {
 					System.out.println("Syntax Error: " + turl);
-					i--;
-					continue;
-					//return;
+					//i--;
+					//continue;
+					return;
 				}
 				for(Element e:html.select("a[href]")) {
-					String nlink = urlfix(urlmerge(e.attr("href"), turl));
+					String nlink = urlmerge(e.attr("href"), turl);
 					if(map.containsKey(nlink)) {
 						i--;
 						continue outer;
@@ -74,20 +76,23 @@ public class Main {
 			}
 			System.out.print(i+"/"+re + " complete\r");
 		}
-		new File(dir+"/index").mkdir();
+		System.out.print("Saving...\r");
+		new File(dir + "\\index.txt").createNewFile();
+		FileWriter writer = new FileWriter(dir + "\\index.txt");
 		for(String e:map.keySet()) {
-			new File(dir + "/index/"+e+".txt").createNewFile();
-			FileWriter writer = new FileWriter(dir + "/index/"+e+".txt");
+			writer.write(e+" ");
 			for(String e2:map.get(e)) {
 				writer.write(e2+" ");
 			}
-			writer.close();
+			writer.write("\n");
 		}
-		FileWriter w2 = new FileWriter(dir + "/queue.txt");
+		writer.close();
+		FileWriter w2 = new FileWriter(dir + "\\queue.txt");
 		while(!list.isEmpty()) {
-			w2.write(list.poll());
+			w2.write(list.poll()+" ");
 		}
 		w2.close();
+		System.out.print("Complete.\r");
 	}
 	static String urlmerge(String url, String lurl) {
 		if(url.length() == 0) return lurl;
@@ -101,12 +106,15 @@ public class Main {
 			return lurl+url;
 		}
 		try {
-			if(url.startsWith("https")||url.startsWith("http:")) return url;
+			if(url.startsWith("javascript:")) return lurl;
+			if(url.startsWith("mail:")) return lurl;
+			if(url.startsWith("http:")||url.startsWith("https:")) return url;
 			if(url.startsWith("//")) {
-				url = Jsoup.connect(url).get().location();
-				return url;
+				//url = Jsoup.connect(url).get().location();
+				return parts[0]+url;
 			}
 		}catch(Exception ignored) {}
+		try {
 		if(url.charAt(0) == '/') {
 			lurl = parts[0]+"//"+parts[2];
 		}
@@ -127,6 +135,12 @@ public class Main {
 			}
 			else return lurl;
 		}
+		else {
+			if(parts.length>2 && parts[parts.length-1].contains(".")) {
+				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
+			}
+		}
+		}catch(StringIndexOutOfBoundsException ex) {}
 		if(lurl.charAt(lurl.length()-1) == '/') {
 			lurl = lurl.substring(0, lurl.length()-1);
 		}
@@ -135,16 +149,6 @@ public class Main {
 		}
 		url = lurl + url;
 		System.out.println(url);
-		return url;
-	}
-	static String urlfix(String url) {
-		String root;
-		try {
-			root = url.split("/")[2];
-		}catch(Exception ex) {return url;}
-		if(root.split(".").length == 2) {
-			url = "//www."+url.substring(2);
-		}
 		return url;
 	}
 }
