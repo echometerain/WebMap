@@ -81,6 +81,7 @@ public class Main {
 				String turl = list.poll();
 				if(list.poll() == null && i > 0)return;
 				if(map.containsKey(turl)) {
+					i--;
 					continue outer;
 				}
 				LinkedList<String> tlist = new LinkedList<>();
@@ -90,15 +91,14 @@ public class Main {
 					turl = html.location();
 				} catch(Exception ex) {
 					System.out.println("Unable to reach: " + turl);
-					//i--;
-					//continue;
-					return;
+					i--;
+					continue;
+					//return;
 				}
 				for(Element e:html.select("a[href]")) {
 					String nlink = urlmerge(e.attr("href"), turl);
 					if(map.containsKey(nlink)) {
-						i--;
-						continue outer;
+						continue;
 					}
 					tlist.add(nlink);
 				}
