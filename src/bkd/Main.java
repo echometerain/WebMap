@@ -11,14 +11,14 @@ public class Main {
 	static String sl = "/";
 	static String dir = System.getProperty("user.dir");
 	public static void main(String[] args) throws IOException {
-		/*
+		
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
 		args = new String[3];
 		args[0] = s.readLine();
 		args[1] = s.readLine();
 		args[2] = s.readLine();
 		s.close();
-		*/
+		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
 		dir = sl+"Data"+sl;
 		if(!new File(dir).isDirectory()) {
