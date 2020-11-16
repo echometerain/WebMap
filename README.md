@@ -4,13 +4,13 @@ A program that takes a webpage, takes all of its embeded links, and recursively 
 
 ## How to run
 
-java -jar WebCrawler.jar (Mode) (RecursionAmount) (URL)
+java -jar WebCrawler.jar (SessionName) (Mode) (RecursionAmount) (URL)
   
- - --index is the only Mode currently
- - RecursionAmount must be integer
- - Multiple URLs could be placed with a space seperator
+ - a session can be named whatever you want, and inputting the name of a previous session whould continue that session's computation.
+ - RecursionAmount must be integer. It determines how many sites the program will process.
+ - Multiple URLs could be placed at the end with a space seperator. It adds urls to a new or existing queue.
  
-Requires JRE 14 to run
+Requires JRE 15 to run
 
 Libraries used:
  - https://github.com/jhy/jsoup/
