@@ -6,10 +6,9 @@ import org.jsoup.nodes.Element;
 
 import java.util.*;
 public class Main {
-	static FileReader files;
 	static Queue<String> list = new LinkedList<>();
 	static HashMap<String, LinkedList<String>> map = new HashMap<>();
-	static String dir = System.getProperty("user.dir") + "\\WebMapData";
+	static String dir = System.getProperty("user.dir") + "\\Data";
 	public static void main(String[] args) throws IOException {
 		
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
@@ -22,24 +21,60 @@ public class Main {
 		if(!new File(dir).isDirectory()) {
 			new File(dir).mkdir();
 		}
-		switch(args[0]) {
-		case "--index":
-			int n = 0;
-			try {
-				n = Integer.parseInt(args[1])+1;
-			}catch(NumberFormatException e) {
-				System.out.println("Repetition size must be a number");
-			}
-			for(int i = 2; i < args.length; i++) {
-				list.add(args[i]);
-			}
-			index(n);
-			break;
-		case "--load":
-			break;
+		if(new File(dir+"\\"+args[0]).isDirectory()) {
+			dir = dir+"\\"+args[0];
+			load();
+			System.out.print("Loading...\r");
+		}else {
+			dir = dir+"\\"+args[0];
+			new File(dir).mkdir();
 		}
+		int n = 0;
+		try {
+		n = Integer.parseInt(args[1])+1;
+		}catch(NumberFormatException e) {
+			System.out.println("Repetition size must be a number");
+		}
+		for(int i = 2; i < args.length; i++) {
+			list.add(args[i]);
+			}
+		index(n);
+		save();
 	}
-	static void index(int re) throws IOException {
+	static void load() throws IOException {
+		BufferedReader reader = new BufferedReader(new FileReader(dir+"\\index.txt"));
+		for(String s = reader.readLine(); s != null; s = reader.readLine()) {
+			String[] tlinks = s.split(" ");
+			LinkedList<String> links = new LinkedList<>(Arrays.asList(tlinks));
+			links.removeFirst();
+			map.put(tlinks[0], links);
+		}
+		reader.close();
+		reader = new BufferedReader(new FileReader(dir+"\\queue.txt"));
+		LinkedList<String> links = new LinkedList<>(Arrays.asList(reader.readLine().split(" ")));
+		list.addAll(links);
+		reader.close();
+	}
+	static void save() throws IOException {
+		System.out.print("Saving...\r");
+		new File(dir + "\\index.txt").createNewFile();
+		FileWriter writer = new FileWriter(dir + "\\index.txt");
+		for(String e:map.keySet()) {
+			writer.write(e+" ");
+			for(String e2:map.get(e)) {
+				writer.write(e2+" ");
+			}
+			writer.write("\n");
+		}
+		writer.close();
+		FileWriter w2 = new FileWriter(dir + "\\queue.txt");
+		while(!list.isEmpty()) {
+			w2.write(list.poll()+" ");
+		}
+		w2.close();
+		System.out.print("Complete.\r");
+	}
+	static void index(int re) {
 		outer:
 		for(long i = 0; i < re; i++) {
 			try {
@@ -75,29 +110,12 @@ public class Main {
 			}
 			System.out.print(i+"/"+(re-1) + " complete\r");
 		}
-		System.out.print("Saving...\r");
-		new File(dir + "\\index.txt").createNewFile();
-		FileWriter writer = new FileWriter(dir + "\\index.txt");
-		for(String e:map.keySet()) {
-			writer.write(e+" ");
-			for(String e2:map.get(e)) {
-				writer.write(e2+" ");
-			}
-			writer.write("\n");
-		}
-		writer.close();
-		FileWriter w2 = new FileWriter(dir + "\\queue.txt");
-		while(!list.isEmpty()) {
-			w2.write(list.poll()+" ");
-		}
-		w2.close();
-		System.out.print("Complete.\r");
 	}
 	static String urlmerge(String url, String lurl) {
 		if(url.length() == 0) return lurl;
 		String[] parts = lurl.split("/");
-		System.out.println();
-		System.out.println(lurl+ " "+url);
+		//System.out.println();
+		//System.out.println(lurl+ " "+url);
 		try {
 			if(url.startsWith("http:")||url.startsWith("https:")) return url;
 			if(url.contains(":")) return lurl;
@@ -141,7 +159,7 @@ public class Main {
 			url = "/"+url;
 		}
 		url = lurl + url;
-		System.out.println(url);
+		//System.out.println(url);
 		return url;
 	}
 }
