@@ -11,16 +11,16 @@ public class Main {
 	static String sl = "/";
 	static String dir = System.getProperty("user.dir");
 	public static void main(String[] args) throws IOException {
-		
+		/*
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
 		args = new String[3];
 		args[0] = s.readLine();
 		args[1] = s.readLine();
 		args[2] = s.readLine();
 		s.close();
-		
+		*/
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
-		dir = sl+"Data"+sl;
+		dir = dir+sl+"Data"+sl;
 		if(!new File(dir).isDirectory()) {
 			new File(dir).mkdir();
 		}
@@ -29,7 +29,7 @@ public class Main {
 			load();
 			System.out.print("Loading...\r");
 		}else {
-			dir = dir+args[0];
+			dir = dir+args[0]+sl;
 			new File(dir).mkdir();
 		}
 		int n = 0;
@@ -124,7 +124,7 @@ public class Main {
 			if(url.contains(":")) return lurl;
 			if(url.startsWith("//")) return parts[0]+url;
 		}catch(Exception ignored) {}
-		if(url.charAt(0) == '#') {
+		if(url.charAt(0) == '#'||url.charAt(0) == '?') {
 			return lurl+url;
 		}
 		try {
