@@ -6,27 +6,30 @@ import org.jsoup.nodes.Element;
 
 import java.util.*;
 public class Main {
-	static Queue<String> list = new LinkedList<>();
-	static HashMap<String, LinkedList<String>> map = new HashMap<>();
-	static String dir = System.getProperty("user.dir") + "\\Data";
+	public static Queue<String> list = new LinkedList<>();
+	public static HashMap<String, LinkedList<String>> map = new HashMap<>();
+	static String sl = "/";
+	static String dir = System.getProperty("user.dir");
 	public static void main(String[] args) throws IOException {
-		
+		/*
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
 		args = new String[3];
 		args[0] = s.readLine();
 		args[1] = s.readLine();
 		args[2] = s.readLine();
 		s.close();
-		
+		*/
+		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
+		dir = sl+"Data"+sl;
 		if(!new File(dir).isDirectory()) {
 			new File(dir).mkdir();
 		}
-		if(new File(dir+"\\"+args[0]).isDirectory()) {
-			dir = dir+"\\"+args[0];
+		if(new File(dir+args[0]).isDirectory()) {
+			dir = dir+args[0];
 			load();
 			System.out.print("Loading...\r");
 		}else {
-			dir = dir+"\\"+args[0];
+			dir = dir+args[0];
 			new File(dir).mkdir();
 		}
 		int n = 0;
@@ -42,7 +45,7 @@ public class Main {
 		save();
 	}
 	static void load() throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(dir+"\\index.txt"));
+		BufferedReader reader = new BufferedReader(new FileReader(dir+"index.txt"));
 		for(String s = reader.readLine(); s != null; s = reader.readLine()) {
 			String[] tlinks = s.split(" ");
 			LinkedList<String> links = new LinkedList<>(Arrays.asList(tlinks));
@@ -50,15 +53,15 @@ public class Main {
 			map.put(tlinks[0], links);
 		}
 		reader.close();
-		reader = new BufferedReader(new FileReader(dir+"\\queue.txt"));
+		reader = new BufferedReader(new FileReader(dir+"queue.txt"));
 		LinkedList<String> links = new LinkedList<>(Arrays.asList(reader.readLine().split(" ")));
 		list.addAll(links);
 		reader.close();
 	}
 	static void save() throws IOException {
 		System.out.print("Saving...\r");
-		new File(dir + "\\index.txt").createNewFile();
-		FileWriter writer = new FileWriter(dir + "\\index.txt");
+		new File(dir + "index.txt").createNewFile();
+		FileWriter writer = new FileWriter(dir + "index.txt");
 		for(String e:map.keySet()) {
 			writer.write(e+" ");
 			for(String e2:map.get(e)) {
@@ -67,12 +70,12 @@ public class Main {
 			writer.write("\n");
 		}
 		writer.close();
-		FileWriter w2 = new FileWriter(dir + "\\queue.txt");
+		FileWriter w2 = new FileWriter(dir + "queue.txt");
 		while(!list.isEmpty()) {
 			w2.write(list.poll()+" ");
 		}
 		w2.close();
-		System.out.print("Complete.\r");
+		System.out.print("Complete. \r");
 	}
 	static void index(int re) {
 		outer:
