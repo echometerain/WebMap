@@ -1,5 +1,4 @@
-module back {
+module app {
 	exports bkd;
-
 	requires org.jsoup;
 }

@@ -10,15 +10,19 @@ public class Main {
 	static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	static String dir = System.getProperty("user.dir") + "\\Data";
 	public static void main(String[] args) throws IOException {
-		
+		/*
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
 		args = new String[3];
 		args[0] = s.readLine();
 		args[1] = s.readLine();
 		args[2] = s.readLine();
 		s.close();
+<<<<<<< HEAD
 		
 <<<<<<< HEAD
+=======
+		*/
+>>>>>>> parent of 48431ff... Update Main.class, module-info.class, and 2 more files...
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
 		dir = sl+"Data"+sl;
 =======
