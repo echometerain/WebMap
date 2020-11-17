@@ -3,7 +3,6 @@ import java.io.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-
 import java.util.*;
 public class Main {
 	public static Queue<String> list = new LinkedList<>();
@@ -11,14 +10,12 @@ public class Main {
 	static String sl = "/";
 	static String dir = System.getProperty("user.dir");
 	public static void main(String[] args) throws IOException {
-		/*
+		
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
-		args = new String[3];
-		args[0] = s.readLine();
-		args[1] = s.readLine();
-		args[2] = s.readLine();
+		String st = s.readLine();
 		s.close();
-		*/
+		args = st.split(" ");
+		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
 		dir = dir+sl+"Data"+sl;
 		if(!new File(dir).isDirectory()) {
@@ -45,14 +42,20 @@ public class Main {
 		save();
 	}
 	static void load() throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(dir+"index.txt"));
-		for(String s = reader.readLine(); s != null; s = reader.readLine()) {
-			String[] tlinks = s.split(" ");
-			LinkedList<String> links = new LinkedList<>(Arrays.asList(tlinks));
-			links.removeFirst();
-			map.put(tlinks[0], links);
-		}
+		BufferedReader reader = new BufferedReader(new FileReader(dir+"index.json"));
+		StringBuilder st = new StringBuilder();
+		for(String s = reader.readLine(); s == null; s = reader.readLine()) st.append(s);
 		reader.close();
+		String[] arr = st.toString().split("([\\[\\]])");
+		for(int i = 0; i < arr.length-1; i+=2) {
+			LinkedList<String> llinks = new LinkedList<>();
+			String[] ar2 = arr[i+1].split("\"");
+			for(int ii = 1; ii < ar2.length-1; ii+=2) {
+				llinks.add(ar2[ii]);
+			}
+			map.put(arr[i].split("\"")[1], llinks);
+		}
+		
 		reader = new BufferedReader(new FileReader(dir+"queue.txt"));
 		LinkedList<String> links = new LinkedList<>(Arrays.asList(reader.readLine().split(" ")));
 		list.addAll(links);
@@ -60,22 +63,29 @@ public class Main {
 	}
 	static void save() throws IOException {
 		System.out.print("Saving...\r");
-		new File(dir + "index.txt").createNewFile();
-		FileWriter writer = new FileWriter(dir + "index.txt");
+		StringBuilder st = new StringBuilder();
+		st.append("{");
 		for(String e:map.keySet()) {
-			writer.write(e+" ");
+			st.append("\""+e+"\":[");
 			for(String e2:map.get(e)) {
-				writer.write(e2+" ");
+				st.append("\""+e2+"\",");
 			}
-			writer.write("\n");
+			st.deleteCharAt(st.length()-1);
+			st.append("],\n");
 		}
+		st.deleteCharAt(st.length()-1);
+		if(st != null)st.append("}");
+		String st2 = st.toString();
+		new File(dir + "index.json").createNewFile();
+		FileWriter writer = new FileWriter(dir + "index.json");
+		writer.write(st2);
 		writer.close();
 		FileWriter w2 = new FileWriter(dir + "queue.txt");
 		while(!list.isEmpty()) {
-			w2.write(list.poll()+" ");
+			w2.write(list.poll()+"\n");
 		}
 		w2.close();
-		System.out.print("Complete.\r");
+		System.out.println("Finished.");
 	}
 	static void index(int re) {
 		outer:
@@ -115,6 +125,8 @@ public class Main {
 		}
 	}
 	static String urlmerge(String url, String lurl) {
+		url.replaceAll("\r","");
+		url.replaceAll(" ","");
 		if(url.length() == 0) return lurl;
 		String[] parts = lurl.split("/");
 		//System.out.println();
@@ -159,7 +171,7 @@ public class Main {
 			lurl = lurl.substring(0, lurl.length()-1);
 		}
 		if(url.length()>0 && url.charAt(0) != '/') {
-			url = "/"+url;
+			url = "/"+ url;
 		}
 		url = lurl + url;
 		//System.out.println(url);
