@@ -70,10 +70,10 @@ public class Main {
 			for(String e2:map.get(e)) {
 				st.append("\""+e2+"\",");
 			}
-			st.deleteCharAt(st.length()-1);
+			if(st.charAt(st.length()-1)==',')st.deleteCharAt(st.length()-1);
 			st.append("],\n");
 		}
-		st.deleteCharAt(st.length()-1);
+		if(st.charAt(st.length()-1)==',')st.deleteCharAt(st.length()-1);
 		if(st != null)st.append("}");
 		String st2 = st.toString();
 		new File(dir + "index.json").createNewFile();
