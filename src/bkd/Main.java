@@ -73,7 +73,7 @@ public class Main {
 			if(st.charAt(st.length()-1)==',')st.deleteCharAt(st.length()-1);
 			st.append("],\n");
 		}
-		if(st.charAt(st.length()-1)==',')st.deleteCharAt(st.length()-1);
+		if(st.charAt(st.length()-2)==',')st.deleteCharAt(st.length()-2);
 		if(st != null)st.append("}");
 		String st2 = st.toString();
 		new File(dir + "index.json").createNewFile();
