@@ -4,7 +4,13 @@ A program that takes a webpage, takes all of its embeded links, and recursively 
 
 ## How to run
 
-java -jar WebCrawler.jar (SessionName) (Mode) (RecursionAmount) (URL)
+Compiled .jar:
+
+    java -jar WebCrawler.jar (SessionName) (Mode) (RecursionAmount) (URLs)
+
+Compiled .exe:
+
+    crawl (SessionName) (Mode) (RecursionAmount) (URLs)
   
  - a session can be named whatever you want, and inputting the name of a previous session whould continue that session's computation.
  - RecursionAmount must be integer. It determines how many sites the program will process.
