@@ -62,7 +62,6 @@ public class Main {
 		reader.close();
 	}
 	static void save() throws IOException {
-		System.out.print("Saving...\r");
 		StringBuilder st = new StringBuilder();
 		st.append("{");
 		for(String e:map.keySet()) {
@@ -88,40 +87,40 @@ public class Main {
 		System.out.println("Finished.");
 	}
 	static void index(int re) {
+		try {
 		outer:
 		for(long i = 0; i < re; i++) {
-			try {
-				String turl = list.poll();
-				if(turl == null)return;
-				if(map.containsKey(turl)) {
-					i--;
-					continue outer;
-				}
-				LinkedList<String> tlist = new LinkedList<>();
-				Document html;
-				try {
-					html = Jsoup.connect(turl).get();
-					turl = html.location();
-				} catch(Exception ex) {
-					System.out.println("Unable to reach: " + turl);
-					i--;
-					continue;
-					//return;
-				}
-				for(Element e:html.select("a[href]")) {
-					String nlink = urlmerge(e.attr("href"), turl);
-					if(map.containsKey(nlink)) {
-						continue;
-					}
-					tlist.add(nlink);
-				}
-				list.addAll(tlist);
-				map.put(turl, tlist);
-			}catch(NoSuchElementException ex) {
-				System.out.println("Reached the end");
-				return;
+			String turl = list.poll();
+			if(turl == null)return;
+			if(map.containsKey(turl)) {
+				i--;
+				continue outer;
 			}
+			LinkedList<String> tlist = new LinkedList<>();
+			Document html;
+			try {
+				html = Jsoup.connect(turl).get();
+				turl = html.location();
+			} catch(Exception ex) {
+				System.out.println("Unable to reach: " + turl);
+				i--;
+				continue;
+				//return;
+			}
+			for(Element e:html.select("a[href]")) {
+				String nlink = urlmerge(e.attr("href"), turl);
+				if(map.containsKey(nlink)) {
+					continue;
+				}
+				tlist.add(nlink);
+			}
+			list.addAll(tlist);
+			map.put(turl, tlist);
 			System.out.print(i+"/"+(re-1) + " complete\r");
+		}
+		}catch(NoSuchElementException ex) {
+			System.out.println("Reached the end");
+			return;
 		}
 	}
 	static String urlmerge(String url, String lurl) {
