@@ -9,18 +9,21 @@ public class Main {
 	public static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	static String sl = "/";
 	static String dir = System.getProperty("user.dir");
+	FileWriter writein;
+	FileWriter writequ;
 	public static void main(String[] args) throws IOException {
-		
-		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
-		String st = s.readLine();
-		s.close();
-		args = st.split(" ");
 		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
 		dir = dir+sl+"Data"+sl;
 		if(!new File(dir).isDirectory()) {
 			new File(dir).mkdir();
 		}
+		
+		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
+		String st = s.readLine();
+		s.close();
+		args = st.split(" ");
+		
 		if(new File(dir+args[0]).isDirectory()) {
 			dir = dir+args[0]+sl;
 			load();
@@ -86,7 +89,14 @@ public class Main {
 		w2.close();
 		System.out.println("Finished.");
 	}
-	static void index(int re) {
+	static void index(int re) throws  {
+		File inf = new File(dir + "index.json");
+		File quf = new File(dir + "queue.txt");
+		
+		if(!inf.isFile())inf.createNewFile();
+		if(!quf.isFile())quf.createNewFile();
+		
+		
 		try {
 		outer:
 		for(long i = 0; i < re; i++) {
