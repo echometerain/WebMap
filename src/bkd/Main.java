@@ -9,8 +9,6 @@ public class Main {
 	public static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	static String sl = "/";
 	static String dir = System.getProperty("user.dir");
-	FileWriter writein;
-	FileWriter writequ;
 	public static void main(String[] args) throws IOException {
 		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
@@ -89,13 +87,20 @@ public class Main {
 		w2.close();
 		System.out.println("Finished.");
 	}
-	static void index(int re) throws  {
+	static void index(int re) throws IOException {
 		File inf = new File(dir + "index.json");
 		File quf = new File(dir + "queue.txt");
+		boolean infn = false;
 		
-		if(!inf.isFile())inf.createNewFile();
+		if(!inf.isFile()) {
+			inf.createNewFile();
+			infn = true;
+		}
 		if(!quf.isFile())quf.createNewFile();
 		
+		FileWriter writein = new FileWriter(inf);
+		if(infn) {writein.write("{\n");}
+		FileWriter writequ = new FileWriter(quf);
 		
 		try {
 		outer:
