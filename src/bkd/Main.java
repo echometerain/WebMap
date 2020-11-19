@@ -97,9 +97,14 @@ public class Main {
 			infn = true;
 		}
 		if(!quf.isFile())quf.createNewFile();
-		
-		FileWriter writein = new FileWriter(inf);
-		if(infn) {writein.write("{\n");}
+		FileWriter writein;
+		if(infn) {
+			writein = new FileWriter(inf);
+			writein.write("{\n");
+		}
+		else {
+			writein = new FileWriter(inf, true);
+		}
 		FileWriter writequ = new FileWriter(quf);
 		
 		try {
@@ -131,6 +136,14 @@ public class Main {
 			}
 			list.addAll(tlist);
 			map.put(turl, tlist);
+			StringBuilder st = new StringBuilder();
+			st.append("\""+turl+"\":[");
+			for(String e:tlist) {
+				st.append("\""+e+"\",");
+			}
+			if(st.charAt(st.length()-1)==',')st.deleteCharAt(st.length()-1);
+			st.append("],\n");
+			
 			System.out.print(i+"/"+(re-1) + " complete\r");
 		}
 		}catch(NoSuchElementException ex) {
