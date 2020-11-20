@@ -3,13 +3,18 @@ import java.io.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import org.apache.commons.collections4.BidiMap;
+import org.apache.commons.collections4.bidimap.DualHashBidiMap;
+
 public class Main {
-	public static Queue<String> list = new LinkedList<>();
+	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	public static HashMap<String, LinkedList<String>> map = new HashMap<>();
+	private static int qstart;
 	private static String sl = "/";
 	private static String dir = System.getProperty("user.dir");
-	public static void main(String[] args) throws IOException {
+	static void main(String[] args) throws IOException {
 		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
 		dir = dir+sl+"Data"+sl;
@@ -24,7 +29,7 @@ public class Main {
 		
 		if(new File(dir+args[0]).isDirectory()) {
 			dir = dir+args[0]+sl;
-			load();
+			//load();
 			System.out.print("Loading...\r");
 		}else {
 			dir = dir+args[0]+sl;
@@ -37,13 +42,42 @@ public class Main {
 			System.out.println("Repetition size must be a number");
 		}
 		for(int i = 2; i < args.length; i++) {
-			list.add(args[i]);
-			}
-		index(n);
-		save();
+			list.put(qstart,args[i]);
+		}
+		map(n);
+		//save();
 	}
-	static void load() throws IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(dir+"index.json"));
+	static void load() throws IOException{
+		BufferedReader reader;
+		try {
+			reader = new BufferedReader(new FileReader(dir+"index.txt"));
+		}catch(FileNotFoundException ex) {
+			System.out.println("index file not found");
+			return;
+		}
+		qstart = Integer.parseInt(reader.readLine());
+		for(String s = reader.readLine(); s == null; s = reader.readLine()) {
+			list.add(s);
+		}
+		reader.close();
+		try {
+			reader = new BufferedReader(new FileReader(dir+"index.txt"));
+		}catch(FileNotFoundException ex) {
+			System.out.println("map file not found");
+			return;
+		}
+		for(String s = reader.readLine(); s == null; s = reader.readLine()) {
+			
+		}
+	}
+	static void loadjson() throws IOException {
+		BufferedReader reader;
+		try {
+			reader = new BufferedReader(new FileReader(dir+"map.json"));
+		}catch(FileNotFoundException ex) {
+			System.out.println("json not found");
+			return;
+		}
 		StringBuilder st = new StringBuilder();
 		for(String s = reader.readLine(); s == null; s = reader.readLine()) st.append(s);
 		reader.close();
@@ -57,20 +91,15 @@ public class Main {
 			map.put(arr[i].split("\"")[1], llinks);
 		}
 		
-		reader = new BufferedReader(new FileReader(dir+"queue.txt"));
+		reader = new BufferedReader(new FileReader(dir+"index.txt"));
 		LinkedList<String> links = new LinkedList<>(Arrays.asList(reader.readLine().split(" ")));
 		list.addAll(links);
 		reader.close();
 	}
-	static void save() throws IOException {
-<<<<<<< HEAD
+
+	static void export() throws IOException {
 		String st = new String();
 		st += "{";
-=======
-		System.out.print("Saving...\r");
-		StringBuilder st = new StringBuilder();
-		st.append("{");
->>>>>>> parent of 6c29a2a... Update Main.class and Main.java
 		for(String e:map.keySet()) {
 			st += "\""+e+"\":[";
 			for(String e2:map.get(e)) {
@@ -81,40 +110,25 @@ public class Main {
 		}
 		if(st.charAt(st.length()-2)==',')st.substring(0, st.length()-2);
 		if(st != null)st += "}";
-		new File(dir + "index.json").createNewFile();
-		FileWriter writer = new FileWriter(dir + "index.json");
+		new File(dir + "map.json").createNewFile();
+		FileWriter writer = new FileWriter(dir + "map.json");
 		writer.write(st);
 		writer.close();
-		FileWriter w2 = new FileWriter(dir + "queue.txt");
+		FileWriter w2 = new FileWriter(dir + "index.txt");
 		while(!list.isEmpty()) {
-			w2.write(list.poll()+"\n");
+			w2.write(list.get(qstart)+"\n");
+			qstart++;
 		}
 		w2.close();
 		System.out.println("Finished.");
 	}
-<<<<<<< HEAD
-	static void index(int re) throws IOException {
-		File inf = new File(dir + "index.json");
-		File quf = new File(dir + "queue.txt");
-		boolean infn = false;
-		
-		if(!inf.isFile()) {
-			inf.createNewFile();
-			infn = true;
-		}
-		if(!quf.isFile())quf.createNewFile();
-		FileWriter writein = new FileWriter(inf, true);
-		if(infn) writein.write("{\n");
-		FileWriter writequ = new FileWriter(quf);
-		
+	static void map(int re) {
 		try {
-=======
-	static void index(int re) {
->>>>>>> parent of 6c29a2a... Update Main.class and Main.java
 		outer:
 		for(long i = 0; i < re; i++) {
-			try {
-				String turl = list.poll();
+			
+				String turl = list.get(qstart);
+				qstart++;
 				if(turl == null)return;
 				if(map.containsKey(turl)) {
 					i--;
@@ -140,24 +154,19 @@ public class Main {
 				}
 				list.addAll(tlist);
 				map.put(turl, tlist);
-			}catch(NoSuchElementException ex) {
-				System.out.println("Reached the end");
-				return;
-			}
-<<<<<<< HEAD
-			list.addAll(tlist);
-			map.put(turl, tlist);
-			String st = "";
-			st += "\""+turl+"\":[";
-			for(String e:tlist) {
-				st += "\""+e+"\",";
-			}
-			if(st.charAt(st.length()-1)==',')st.substring(0, st.length()-1);
-			st += "],\n";
+				String st = "";
+				st += "\""+turl+"\":[";
+				for(String e:tlist) {
+					st += "\""+e+"\",";
+				}
+				if(st.charAt(st.length()-1)==',')st.substring(0, st.length()-1);
+				st += "],\n";
 			
-=======
->>>>>>> parent of 6c29a2a... Update Main.class and Main.java
-			System.out.print(i+"/"+(re-1) + " complete\r");
+				System.out.print(i+"/"+(re-1) + " complete\r");
+			}
+		}catch(NoSuchElementException ex) {
+			System.out.println("Reached the end");
+			return;
 		}
 	}
 	static String urlmerge(String url, String lurl) {
