@@ -63,8 +63,14 @@ public class Main {
 		reader.close();
 	}
 	static void save() throws IOException {
+<<<<<<< HEAD
 		String st = new String();
 		st += "{";
+=======
+		System.out.print("Saving...\r");
+		StringBuilder st = new StringBuilder();
+		st.append("{");
+>>>>>>> parent of 6c29a2a... Update Main.class and Main.java
 		for(String e:map.keySet()) {
 			st += "\""+e+"\":[";
 			for(String e2:map.get(e)) {
@@ -86,6 +92,7 @@ public class Main {
 		w2.close();
 		System.out.println("Finished.");
 	}
+<<<<<<< HEAD
 	static void index(int re) throws IOException {
 		File inf = new File(dir + "index.json");
 		File quf = new File(dir + "queue.txt");
@@ -101,32 +108,43 @@ public class Main {
 		FileWriter writequ = new FileWriter(quf);
 		
 		try {
+=======
+	static void index(int re) {
+>>>>>>> parent of 6c29a2a... Update Main.class and Main.java
 		outer:
 		for(long i = 0; i < re; i++) {
-			String turl = list.poll();
-			if(turl == null)return;
-			if(map.containsKey(turl)) {
-				i--;
-				continue outer;
-			}
-			LinkedList<String> tlist = new LinkedList<>();
-			Document html;
 			try {
-				html = Jsoup.connect(turl).get();
-				turl = html.location();
-			} catch(Exception ex) {
-				System.out.println("Unable to reach: " + turl);
-				i--;
-				continue;
-				//return;
-			}
-			for(Element e:html.select("a[href]")) {
-				String nlink = urlmerge(e.attr("href"), turl);
-				if(map.containsKey(nlink)) {
-					continue;
+				String turl = list.poll();
+				if(turl == null)return;
+				if(map.containsKey(turl)) {
+					i--;
+					continue outer;
 				}
-				tlist.add(nlink);
+				LinkedList<String> tlist = new LinkedList<>();
+				Document html;
+				try {
+					html = Jsoup.connect(turl).get();
+					turl = html.location();
+				} catch(Exception ex) {
+					System.out.println("Unable to reach: " + turl);
+					i--;
+					continue;
+					//return;
+				}
+				for(Element e:html.select("a[href]")) {
+					String nlink = urlmerge(e.attr("href"), turl);
+					if(map.containsKey(nlink)) {
+						continue;
+					}
+					tlist.add(nlink);
+				}
+				list.addAll(tlist);
+				map.put(turl, tlist);
+			}catch(NoSuchElementException ex) {
+				System.out.println("Reached the end");
+				return;
 			}
+<<<<<<< HEAD
 			list.addAll(tlist);
 			map.put(turl, tlist);
 			String st = "";
@@ -137,11 +155,9 @@ public class Main {
 			if(st.charAt(st.length()-1)==',')st.substring(0, st.length()-1);
 			st += "],\n";
 			
+=======
+>>>>>>> parent of 6c29a2a... Update Main.class and Main.java
 			System.out.print(i+"/"+(re-1) + " complete\r");
-		}
-		}catch(NoSuchElementException ex) {
-			System.out.println("Reached the end");
-			return;
 		}
 	}
 	static String urlmerge(String url, String lurl) {
