@@ -7,8 +7,8 @@ import java.util.*;
 public class Main {
 	public static Queue<String> list = new LinkedList<>();
 	public static HashMap<String, LinkedList<String>> map = new HashMap<>();
-	static String sl = "/";
-	static String dir = System.getProperty("user.dir");
+	private static String sl = "/";
+	private static String dir = System.getProperty("user.dir");
 	public static void main(String[] args) throws IOException {
 		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
@@ -63,22 +63,21 @@ public class Main {
 		reader.close();
 	}
 	static void save() throws IOException {
-		StringBuilder st = new StringBuilder();
-		st.append("{");
+		String st = new String();
+		st += "{";
 		for(String e:map.keySet()) {
-			st.append("\""+e+"\":[");
+			st += "\""+e+"\":[";
 			for(String e2:map.get(e)) {
-				st.append("\""+e2+"\",");
+				st += "\""+e2+"\",";
 			}
-			if(st.charAt(st.length()-1)==',')st.deleteCharAt(st.length()-1);
-			st.append("],\n");
+			if(st.charAt(st.length()-1)==',')st.substring(0, st.length()-1);
+			st += "],\n";
 		}
-		if(st.charAt(st.length()-2)==',')st.deleteCharAt(st.length()-2);
-		if(st != null)st.append("}");
-		String st2 = st.toString();
+		if(st.charAt(st.length()-2)==',')st.substring(0, st.length()-2);
+		if(st != null)st += "}";
 		new File(dir + "index.json").createNewFile();
 		FileWriter writer = new FileWriter(dir + "index.json");
-		writer.write(st2);
+		writer.write(st);
 		writer.close();
 		FileWriter w2 = new FileWriter(dir + "queue.txt");
 		while(!list.isEmpty()) {
@@ -97,14 +96,8 @@ public class Main {
 			infn = true;
 		}
 		if(!quf.isFile())quf.createNewFile();
-		FileWriter writein;
-		if(infn) {
-			writein = new FileWriter(inf);
-			writein.write("{\n");
-		}
-		else {
-			writein = new FileWriter(inf, true);
-		}
+		FileWriter writein = new FileWriter(inf, true);
+		if(infn) writein.write("{\n");
 		FileWriter writequ = new FileWriter(quf);
 		
 		try {
@@ -136,13 +129,13 @@ public class Main {
 			}
 			list.addAll(tlist);
 			map.put(turl, tlist);
-			StringBuilder st = new StringBuilder();
-			st.append("\""+turl+"\":[");
+			String st = "";
+			st += "\""+turl+"\":[";
 			for(String e:tlist) {
-				st.append("\""+e+"\",");
+				st += "\""+e+"\",";
 			}
-			if(st.charAt(st.length()-1)==',')st.deleteCharAt(st.length()-1);
-			st.append("],\n");
+			if(st.charAt(st.length()-1)==',')st.substring(0, st.length()-1);
+			st += "],\n";
 			
 			System.out.print(i+"/"+(re-1) + " complete\r");
 		}
