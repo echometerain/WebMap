@@ -3,15 +3,18 @@ import java.io.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import java.util.HashMap;
-import java.util.LinkedList;
+
+import java.util.HashSet;
+import java.util.NoSuchElementException;
+
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 public class Main {
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
-	public static HashMap<String, LinkedList<String>> map = new HashMap<>();
-	private static int qstart;
+	//public static HashMap<String, LinkedList<String>> map = new HashMap<>();
+	private static int llen = 1;
+	private static int lstart = 1;
 	private static String sl = "/";
 	private static String dir = System.getProperty("user.dir");
 	static void main(String[] args) throws IOException {
@@ -27,13 +30,11 @@ public class Main {
 		s.close();
 		args = st.split(" ");
 		
-		if(new File(dir+args[0]).isDirectory()) {
-			dir = dir+args[0]+sl;
-			//load();
+		if(new File(dir+args[0]+".index").isFile() && new File(dir+args[0]+".map").isFile()) {
+			load(args[0]);
 			System.out.print("Loading...\r");
 		}else {
-			dir = dir+args[0]+sl;
-			new File(dir).mkdir();
+			
 		}
 		int n = 0;
 		try {
@@ -42,62 +43,64 @@ public class Main {
 			System.out.println("Repetition size must be a number");
 		}
 		for(int i = 2; i < args.length; i++) {
-			list.put(qstart,args[i]);
+			list.put(llen,args[i]);
+			llen++;
 		}
-		map(n);
-		//save();
+		map(n, args[0]);
 	}
-	static void load() throws IOException{
+	static void load(String name) throws IOException{
 		BufferedReader reader;
 		try {
-			reader = new BufferedReader(new FileReader(dir+"index.txt"));
+			reader = new BufferedReader(new FileReader(dir+name+".index"));
 		}catch(FileNotFoundException ex) {
 			System.out.println("index file not found");
 			return;
 		}
-		qstart = Integer.parseInt(reader.readLine());
-		for(String s = reader.readLine(); s == null; s = reader.readLine()) {
-			list.add(s);
+		if(!new File(dir+name+".map").isFile()) {
+			System.out.println("map not found");
 		}
+		for(String s = reader.readLine(); s == null; s = reader.readLine()) {
+			list.put(llen, s);
+			llen++;
+		}
+		llen--;
+		lstart = Integer.parseInt(list.get(llen));
+		list.remove(llen);
 		reader.close();
-		try {
-			reader = new BufferedReader(new FileReader(dir+"index.txt"));
-		}catch(FileNotFoundException ex) {
-			System.out.println("map file not found");
-			return;
-		}
-		for(String s = reader.readLine(); s == null; s = reader.readLine()) {
-			
-		}
 	}
-	static void loadjson() throws IOException {
+	static void loadjson(String name) throws IOException {
 		BufferedReader reader;
 		try {
-			reader = new BufferedReader(new FileReader(dir+"map.json"));
+			reader = new BufferedReader(new FileReader(dir+name+".json"));
 		}catch(FileNotFoundException ex) {
 			System.out.println("json not found");
 			return;
 		}
+		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + name + ".map"));
+		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + name + ".index"));
 		StringBuilder st = new StringBuilder();
 		for(String s = reader.readLine(); s == null; s = reader.readLine()) st.append(s);
 		reader.close();
 		String[] arr = st.toString().split("([\\[\\]])");
 		for(int i = 0; i < arr.length-1; i+=2) {
-			LinkedList<String> llinks = new LinkedList<>();
+			HashSet<String> llinks = new HashSet<>();
 			String[] ar2 = arr[i+1].split("\"");
 			for(int ii = 1; ii < ar2.length-1; ii+=2) {
 				llinks.add(ar2[ii]);
 			}
-			map.put(arr[i].split("\"")[1], llinks);
+			writemap.append(arr[i].split("\"")[1]);
+			writein.append("404");
+			for(String e:llinks) {
+				writemap.append(" "+e);
+				writein.append("\n"+e);
+			}
+			writemap.append("\n");
 		}
-		
-		reader = new BufferedReader(new FileReader(dir+"index.txt"));
-		LinkedList<String> links = new LinkedList<>(Arrays.asList(reader.readLine().split(" ")));
-		list.addAll(links);
-		reader.close();
+		writemap.close();
+		writein.close();
 	}
-
-	static void export() throws IOException {
+	static void export(String name) throws IOException {
+		/*
 		String st = new String();
 		st += "{";
 		for(String e:map.keySet()) {
@@ -116,58 +119,68 @@ public class Main {
 		writer.close();
 		FileWriter w2 = new FileWriter(dir + "index.txt");
 		while(!list.isEmpty()) {
-			w2.write(list.get(qstart)+"\n");
-			qstart++;
+			w2.write(list.get(llen)+"\n");
+			llen++;
 		}
 		w2.close();
 		System.out.println("Finished.");
+		*/
 	}
-	static void map(int re) {
+	static void map(int re, String name) throws IOException{
+		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + name + ".map"));
+		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + name + ".index"));
 		try {
 		outer:
 		for(long i = 0; i < re; i++) {
 			
-				String turl = list.get(qstart);
-				qstart++;
-				if(turl == null)return;
-				if(map.containsKey(turl)) {
-					i--;
-					continue outer;
-				}
-				LinkedList<String> tlist = new LinkedList<>();
-				Document html;
-				try {
-					html = Jsoup.connect(turl).get();
-					turl = html.location();
-				} catch(Exception ex) {
-					System.out.println("Unable to reach: " + turl);
-					i--;
-					continue;
-					//return;
-				}
-				for(Element e:html.select("a[href]")) {
-					String nlink = urlmerge(e.attr("href"), turl);
-					if(map.containsKey(nlink)) {
-						continue;
-					}
-					tlist.add(nlink);
-				}
-				list.addAll(tlist);
-				map.put(turl, tlist);
-				String st = "";
-				st += "\""+turl+"\":[";
-				for(String e:tlist) {
-					st += "\""+e+"\",";
-				}
-				if(st.charAt(st.length()-1)==',')st.substring(0, st.length()-1);
-				st += "],\n";
-			
-				System.out.print(i+"/"+(re-1) + " complete\r");
+			String turl = list.get(lstart);
+			lstart++;
+			if(turl == null) {
+				writein.close();
+				writemap.close();
+				return;
 			}
+			if(list.containsValue(turl)) {
+				i--;
+				continue outer;
+			}
+			HashSet<String> tlist = new HashSet<>();
+			Document html;
+			try {
+				html = Jsoup.connect(turl).get();
+				turl = html.location();
+			} catch(Exception ex) {
+				System.out.println("Unable to reach: " + turl);
+				i--;
+				continue;
+				//return;
+			}
+			for(Element e:html.select("a[href]")) {
+				String nlink = urlmerge(e.attr("href"), turl);
+				if(list.containsValue(nlink)) {
+					continue;
+				}
+				tlist.add(nlink);
+			}
+			writemap.append(turl);
+			for(String e:tlist) {
+				writemap.append(" "+e);
+				writein.append("\n"+e);
+				
+				list.put(llen, e);
+				llen++;
+			}
+			writemap.append("\n");
+		}
 		}catch(NoSuchElementException ex) {
 			System.out.println("Reached the end");
+			writein.close();
+			writemap.close();
 			return;
 		}
+		writein.append(Integer.toString(lstart));
+		writein.close();
+		writemap.close();
 	}
 	static String urlmerge(String url, String lurl) {
 		url.replaceAll("\r","");
