@@ -17,7 +17,7 @@ public class Main {
 	private static int lstart = 1;
 	private static String sl = "/";
 	private static String dir = System.getProperty("user.dir");
-	static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException {
 		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
 		dir = dir+sl+"Data"+sl;
@@ -46,6 +46,7 @@ public class Main {
 			list.put(llen,args[i]);
 			llen++;
 		}
+		
 		map(n, args[0]);
 	}
 	static void load(String name) throws IOException{
@@ -130,19 +131,14 @@ public class Main {
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + name + ".map"));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + name + ".index"));
 		try {
-		outer:
 		for(long i = 0; i < re; i++) {
-			
 			String turl = list.get(lstart);
+			//System.out.println(turl);
 			lstart++;
 			if(turl == null) {
 				writein.close();
 				writemap.close();
 				return;
-			}
-			if(list.containsValue(turl)) {
-				i--;
-				continue outer;
 			}
 			HashSet<String> tlist = new HashSet<>();
 			Document html;
@@ -150,6 +146,7 @@ public class Main {
 				html = Jsoup.connect(turl).get();
 				turl = html.location();
 			} catch(Exception ex) {
+				System.out.println(0);
 				System.out.println("Unable to reach: " + turl);
 				i--;
 				continue;
@@ -166,11 +163,13 @@ public class Main {
 			for(String e:tlist) {
 				writemap.append(" "+e);
 				writein.append("\n"+e);
-				
-				list.put(llen, e);
-				llen++;
+				if(!list.containsValue(e)) {
+					list.put(llen, e);
+					llen++;
+				}
 			}
 			writemap.append("\n");
+			System.out.print(i+"/"+(re-1)+" complete\r");
 		}
 		}catch(NoSuchElementException ex) {
 			System.out.println("Reached the end");
@@ -183,12 +182,14 @@ public class Main {
 		writemap.close();
 	}
 	static String urlmerge(String url, String lurl) {
-		url.replaceAll("\r","");
-		url.replaceAll(" ","");
+		lurl.replaceAll("\r","");
+		lurl.replaceAll(" ","");
 		if(url.length() == 0) return lurl;
 		String[] parts = lurl.split("/");
-		//System.out.println();
-		//System.out.println(lurl+ " "+url);
+		System.out.println();
+		System.out.println();
+		System.out.println(lurl);
+		System.out.println(url);
 		try {
 			if(url.startsWith("http:")||url.startsWith("https:")) return url;
 			if(url.contains(":")) return lurl;
