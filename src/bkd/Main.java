@@ -53,28 +53,46 @@ public class Main {
 		
 		map(n);
 	}
+	static void recoverq() throws IOException{
+		BufferedReader map = new BufferedReader(new FileReader(dir+".map"));
+		while(map.readLine() != null) {
+			lstart++;
+		}
+		map.close();
+	}
 	static void load() throws IOException{
+		if(!new File(dir+".q").isFile()) {
+			System.out.println("Queue location file not found. Reprocessing...");
+			recoverq();
+		}
+		else {
+			BufferedReader q = new BufferedReader(new FileReader(dir+".q"));
+			String qst = q.readLine();
+			q.close();
+			try {
+				Integer.parseInt(qst);
+			}catch(NumberFormatException ex) {
+				System.out.println("Queue location file currupted. Reprocessing...");
+				recoverq();
+			}
+			lstart = Integer.parseInt(qst);
+		}
 		if(!new File(dir+".index").isFile()) {
-			System.out.println("index not found");
+			System.out.println("Index not found.");
+			return;
+		}
+		if(!new File(dir+".map").isFile()) {
+			System.out.println("Map not found. Recompute?");
 			return;
 		}
 		BufferedReader reader = new BufferedReader(new FileReader(dir+".index"));
-		System.out.println(dir+".index");
-		if(!new File(dir+".map").isFile()) {
-			System.out.println("map not found");
-			reader.close();
-			return;
-		}
 		for(String s = reader.readLine(); s != null; s = reader.readLine()) {
 			list.put(llen, s);
 			llen++;
 		}
-		llen--;
-		lstart = Integer.parseInt(list.get(llen));
-		list.remove(llen);
 		reader.close();
 	}
-	static void loadjson() throws IOException {
+	static void importr() throws IOException {
 		BufferedReader reader;
 		try {
 			reader = new BufferedReader(new FileReader(dir+".json"));
@@ -151,7 +169,6 @@ public class Main {
 				html = Jsoup.connect(turl).get();
 				turl = html.location();
 			} catch(Exception ex) {
-				System.out.println(0);
 				System.out.println("Unable to reach: " + turl);
 				i--;
 				continue;
@@ -159,19 +176,17 @@ public class Main {
 			}
 			for(Element e:html.select("a[href]")) {
 				String nlink = urlmerge(e.attr("href"), turl);
-				if(list.containsValue(nlink)) {
-					continue;
-				}
+				if(nlink.equals(""))continue;
 				tlist.add(nlink);
 			}
-			writemap.append(turl);
+			System.out.println(tlist.size());
 			for(String e:tlist) {
-				writemap.append(" "+e);
-				writein.append(e+"\n");
 				if(!list.containsValue(e)) {
 					list.put(llen, e);
 					llen++;
+					writein.append(e+"\n");
 				}
+				writemap.append(list.getKey(e)+" ");
 			}
 			writemap.append("\n");
 			System.out.print((i+1)+"/"+re+" complete\r");
@@ -196,10 +211,10 @@ public class Main {
 		}
 		try {
 			if(url.startsWith("http:")||url.startsWith("https:")) return url;
-			if(url.contains(":")) return lurl;
+			if(url.contains(":")) return "";
 			if(url.startsWith("//")) return parts[0]+url;
 		}catch(Exception ignored) {}
-		if(url.charAt(0) == '#'||url.charAt(0) == '?') {
+		if(url.charAt(0) == '#'||url.charAt(0) == '?'||url.charAt(0) == '&') {
 			return lurl+url;
 		}
 		try {
@@ -222,7 +237,7 @@ public class Main {
 				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
 				url = url.substring(3, url.length());
 			}
-			else return lurl;
+			else return "";
 		}
 		else {
 			if(parts.length>3 && parts[parts.length-1].contains(".")) {
