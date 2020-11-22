@@ -14,9 +14,9 @@ public class Main {
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	//public static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	private static int llen = 1;
-	private static int lstart = 1;
+	public static int lstart = 1;
 	private static String sl = "/";
-	private static String dir = System.getProperty("user.dir");
+	public static String dir = System.getProperty("user.dir");
 	public static void main(String[] args) throws IOException {
 		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
@@ -30,17 +30,20 @@ public class Main {
 		s.close();
 		args = st.split(" ");
 		
-		if(new File(dir+args[0]+".index").isFile() && new File(dir+args[0]+".map").isFile()) {
-			load(args[0]);
+		dir+=args[0];
+		if(new File(dir+".index").isFile()) {
+			load();
 			System.out.print("Loading...\r");
 		}else {
-			new File(dir+args[0]+".index").createNewFile();
-			new File(dir+args[0]+".map").createNewFile();
+			new File(dir+".index").createNewFile();
+			new File(dir+".map").createNewFile();
 		}
+		Runtime.getRuntime().addShutdownHook(new shutdown());
 		int n = 0;
 		try {
-		n = Integer.parseInt(args[1])+1;
+		n = Integer.parseInt(args[1]);
 		}catch(NumberFormatException e) {
+			
 			System.out.println("Repetition size must be a number");
 		}
 		for(int i = 2; i < args.length; i++) {
@@ -48,16 +51,16 @@ public class Main {
 			llen++;
 		}
 		
-		map(n, args[0]);
+		map(n);
 	}
-	static void load(String name) throws IOException{
-		if(!new File(dir+name+".index").isFile()) {
+	static void load() throws IOException{
+		if(!new File(dir+".index").isFile()) {
 			System.out.println("index not found");
 			return;
 		}
-		BufferedReader reader = new BufferedReader(new FileReader(dir+name+".index"));
-		System.out.println(dir+name+".index");
-		if(!new File(dir+name+".map").isFile()) {
+		BufferedReader reader = new BufferedReader(new FileReader(dir+".index"));
+		System.out.println(dir+".index");
+		if(!new File(dir+".map").isFile()) {
 			System.out.println("map not found");
 			reader.close();
 			return;
@@ -71,16 +74,16 @@ public class Main {
 		list.remove(llen);
 		reader.close();
 	}
-	static void loadjson(String name) throws IOException {
+	static void loadjson() throws IOException {
 		BufferedReader reader;
 		try {
-			reader = new BufferedReader(new FileReader(dir+name+".json"));
+			reader = new BufferedReader(new FileReader(dir+".json"));
 		}catch(FileNotFoundException ex) {
 			System.out.println("json not found");
 			return;
 		}
-		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + name + ".map"));
-		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + name + ".index"));
+		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map"));
+		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index"));
 		StringBuilder st = new StringBuilder();
 		for(String s = reader.readLine(); s == null; s = reader.readLine()) st.append(s);
 		reader.close();
@@ -102,7 +105,7 @@ public class Main {
 		writemap.close();
 		writein.close();
 	}
-	static void export(String name) throws IOException {
+	static void export() throws IOException {
 		/*
 		String st = new String();
 		st += "{";
@@ -129,11 +132,11 @@ public class Main {
 		System.out.println("Finished.");
 		*/
 	}
-	static void map(int re, String name) throws IOException{
-		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + name + ".map", true));
-		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + name + ".index", true));
+	static void map(int re) throws IOException{
+		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
+		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
 		try {
-		for(long i = 1; i < re; i++) {
+		for(long i = 0; i < re; i++) {
 			String turl = list.get(lstart);
 			//System.out.println(turl);
 			lstart++;
@@ -171,7 +174,7 @@ public class Main {
 				}
 			}
 			writemap.append("\n");
-			System.out.print(i+"/"+(re-1)+" complete\r");
+			System.out.print((i+1)+"/"+re+" complete\r");
 		}
 		}catch(NoSuchElementException ex) {
 			System.out.println("Reached the end");
@@ -179,7 +182,6 @@ public class Main {
 			writemap.close();
 			return;
 		}
-		writein.append(Integer.toString(lstart));
 		writein.close();
 		writemap.close();
 	}
@@ -237,5 +239,16 @@ public class Main {
 		url = lurl + url;
 		//System.out.println(url);
 		return url;
+	}
+}
+class shutdown extends Thread{
+	public void run(){
+		try {
+			new File(Main.dir+".q").createNewFile();
+			FileWriter f = new FileWriter(Main.dir+".q");
+			f.append(Integer.toString(Main.lstart));
+			f.close();
+		} catch(IOException ex) {}
+		
 	}
 }
