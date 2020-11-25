@@ -5,7 +5,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.util.HashSet;
-import java.util.NoSuchElementException;
+
+import org.htmlcleaner.*;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -13,6 +14,7 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 public class Main {
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	private static int llen = 1;
+	private static HtmlCleaner cleaner = new HtmlCleaner();
 	public static int lstart = 1;
 	private static String sl = "/";
 	public static String dir = System.getProperty("user.dir");
@@ -152,20 +154,24 @@ public class Main {
 	static void map(int re) throws IOException{
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
-		Document html;
-		try {
+		TagNode root;
+		int retries = 0;
+		String turl = "";
 		for(long i = 0; i < re; i++) {
-			String turl = list.get(lstart);
-			//System.out.println(turl);
-			lstart++;
-			if(turl == null) {
+			if(list.containsKey(lstart)) {
+				turl = list.get(lstart);
+				//System.out.println(turl);
+				lstart++;
+			}
+			else {
+				System.out.println("Reached the end");
 				writein.close();
 				writemap.close();
 				return;
 			}
 			HashSet<String> tlist = new HashSet<>();
 			try {
-				html = Jsoup.connect(turl).get();
+				root = cleaner.clean(turl);
 				//turl = html.location();
 			} catch(Exception ex) {
 				System.out.println("Unable to reach: " + turl);
@@ -173,16 +179,21 @@ public class Main {
 				continue;
 				//return;
 			}
-			for(Element e:html.select("a[href]")) {
+			for(elements e:root.getElementsByName("a", true)) {
 				String nlink = urlfix(urlmerge(e.attr("href"), turl));
-				if(nlink.length() == 0)continue;
-				tlist.add(nlink);
+				if(nlink.length() == 0) {}
+				else {tlist.add(nlink);}
 			}
-			if(tlist.size() == 0) {
+			if(retries > 2) {
+				retries = 0;
+			}
+			else if(tlist.size() == 0) {
 				lstart--;
 				i--;
+				retries++;
 				continue;
 			}
+			//System.out.println(turl);
 			for(String e:tlist) {
 				if(!list.containsValue(e)) {
 					list.put(llen, urlfix(e));
@@ -193,12 +204,6 @@ public class Main {
 			}
 			writemap.append("\n");
 			System.out.print((i+1)+"/"+re+" complete\r");
-		}
-		}catch(NoSuchElementException ex) {
-			System.out.println("Reached the end");
-			writein.close();
-			writemap.close();
-			return;
 		}
 		writein.close();
 		writemap.close();
