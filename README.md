@@ -19,6 +19,5 @@ Compiled .exe:
 Requires JRE 15 to run
 
 Libraries used:
- - https://github.com/jhy/jsoup/
-
-Under the MIT license because I think jsoup said I had to.
+ - https://github.com/jhy/jsoup/ MIT License
+ - https://github.com/apache/commons-collections Apache 2.0 Licence
