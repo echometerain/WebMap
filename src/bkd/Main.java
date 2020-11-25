@@ -1,7 +1,6 @@
 package bkd;
 import java.io.*;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.util.HashSet;
@@ -53,17 +52,22 @@ public class Main {
 		
 		map(n);
 	}
-	static void recoverq() throws IOException{
+	static void cmds(String[] args) {
+		
+	}
+	static int recoverq() throws IOException{
+		int start = 1;
 		BufferedReader map = new BufferedReader(new FileReader(dir+".map"));
 		while(map.readLine() != null) {
 			lstart++;
 		}
 		map.close();
+		return start;
 	}
 	static void load() throws IOException{
 		if(!new File(dir+".q").isFile()) {
 			System.out.println("Queue location file not found. Reprocessing...");
-			recoverq();
+			lstart = recoverq();
 		}
 		else {
 			BufferedReader q = new BufferedReader(new FileReader(dir+".q"));
@@ -73,7 +77,7 @@ public class Main {
 				Integer.parseInt(qst);
 			}catch(NumberFormatException ex) {
 				System.out.println("Queue location file currupted. Reprocessing...");
-				recoverq();
+				lstart = recoverq();
 			}
 			lstart = Integer.parseInt(qst);
 		}
@@ -102,21 +106,26 @@ public class Main {
 		}
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map"));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index"));
-		StringBuilder st = new StringBuilder();
-		for(String s = reader.readLine(); s == null; s = reader.readLine()) st.append(s);
+		String st = "";
+		for(String s = reader.readLine(); s != null; s = reader.readLine()) st += s;
 		reader.close();
-		String[] arr = st.toString().split("([\\[\\]])");
+		String[] arr = st.split("([\\[\\]])");
 		for(int i = 0; i < arr.length-1; i+=2) {
 			HashSet<String> llinks = new HashSet<>();
 			String[] ar2 = arr[i+1].split("\"");
+			String key = arr[i].split("\"")[1];
+			list.put(lstart, key);
+			lstart++;
+			writein.append(key+"\n");
 			for(int ii = 1; ii < ar2.length-1; ii+=2) {
 				llinks.add(ar2[ii]);
+				list.put(lstart, ar2[ii]);
+				lstart++;
+				writein.append(ar2[ii]+"\n");
 			}
 			writemap.append(arr[i].split("\"")[1]);
-			writein.append("404");
 			for(String e:llinks) {
-				writemap.append(" "+e);
-				writein.append("\n"+e);
+				writemap.append(" "+list.getKey(e));
 			}
 			writemap.append("\n");
 		}
@@ -124,31 +133,28 @@ public class Main {
 		writein.close();
 	}
 	static void export() throws IOException {
-		/*
+		load();
+		new File(dir+".json").createNewFile();
+		BufferedReader reader = new BufferedReader(new FileReader(dir + ".map"));
 		String st = new String();
 		st += "{";
-		for(String e:map.keySet()) {
-			st += "\""+e+"\":[";
-			for(String e2:map.get(e)) {
+		int count = 1;
+		for(String s = reader.readLine(); s != null; s = reader.readLine()) {
+			st += "\""+list.get(count)+"\":[";
+			count++;
+			for(String e2:s.split(" ")) {
 				st += "\""+e2+"\",";
 			}
 			if(st.charAt(st.length()-1)==',')st.substring(0, st.length()-1);
 			st += "],\n";
 		}
+		reader.close();
 		if(st.charAt(st.length()-2)==',')st.substring(0, st.length()-2);
 		if(st != null)st += "}";
-		new File(dir + "map.json").createNewFile();
 		FileWriter writer = new FileWriter(dir + "map.json");
 		writer.write(st);
 		writer.close();
-		FileWriter w2 = new FileWriter(dir + "index.txt");
-		while(!list.isEmpty()) {
-			w2.write(list.get(llen)+"\n");
-			llen++;
-		}
-		w2.close();
 		System.out.println("Finished.");
-		*/
 	}
 	static void map(int re) throws IOException{
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
@@ -164,17 +170,16 @@ public class Main {
 				return;
 			}
 			HashSet<String> tlist = new HashSet<>();
-			Document html;
+			String html;
 			try {
-				html = Jsoup.connect(turl).get();
-				turl = html.location();
+				html = Jsoup.connect(turl).get().html();
 			} catch(Exception ex) {
 				System.out.println("Unable to reach: " + turl);
 				i--;
 				continue;
 				//return;
 			}
-			for(Element e:html.select("a[href]")) {
+			for(Element e:Jsoup.parse(html).select("a[href]")) {
 				String nlink = urlmerge(e.attr("href"), turl);
 				if(nlink.equals(""))continue;
 				tlist.add(nlink);
