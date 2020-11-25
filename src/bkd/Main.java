@@ -1,12 +1,9 @@
 package bkd;
 import java.io.*;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.util.HashSet;
-
-import org.htmlcleaner.*;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -14,7 +11,6 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 public class Main {
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	private static int llen = 1;
-	private static HtmlCleaner cleaner = new HtmlCleaner();
 	public static int lstart = 1;
 	private static String sl = "/";
 	public static String dir = System.getProperty("user.dir");
@@ -154,10 +150,9 @@ public class Main {
 	static void map(int re) throws IOException{
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
-=======
-		Document html;
-		try {
->>>>>>> parent of a4336a1... brun rv with the wrong ingredient@
+		String html;
+		int retries = 0;
+		String turl = "";
 		for(long i = 0; i < re; i++) {
 			if(list.containsKey(lstart)) {
 				turl = list.get(lstart);
@@ -172,28 +167,17 @@ public class Main {
 			}
 			HashSet<String> tlist = new HashSet<>();
 			try {
-<<<<<<< HEAD
-				root = cleaner.clean(turl);
-				//turl = html.location();
-=======
-				html = Jsoup.connect(turl).get();
-<<<<<<< HEAD
-				turl = html.location();
->>>>>>> parent of a4336a1... brun rv with the wrong ingredient@
-=======
-				//turl = html.location();
->>>>>>> a4336a1... brun rv with the wrong ingredient@
+				html = Jsoup.connect(turl).get().html();
 			} catch(Exception ex) {
 				System.out.println("Unable to reach: " + turl);
 				i--;
 				continue;
 				//return;
 			}
-<<<<<<< HEAD
-			for(elements e:root.getElementsByName("a", true)) {
+			for(Element e:Jsoup.parse(html).select("a[herf]")) {
 				String nlink = urlfix(urlmerge(e.attr("href"), turl));
-				if(nlink.length() == 0) {}
-				else {tlist.add(nlink);}
+				if(nlink.length() == 0)continue;
+				tlist.add(nlink);
 			}
 			if(retries > 2) {
 				retries = 0;
@@ -205,22 +189,11 @@ public class Main {
 				continue;
 			}
 			//System.out.println(turl);
-=======
-			for(Element e:html.select("a[href]")) {
-				String nlink = urlfix(urlmerge(e.attr("href"), turl));
-				if(nlink.length() == 0)continue;
-				tlist.add(nlink);
-			}
-<<<<<<< HEAD
-			System.out.println(tlist.size());
->>>>>>> parent of a4336a1... brun rv with the wrong ingredient@
-=======
 			if(tlist.size() == 0) {
 				lstart--;
 				i--;
 				continue;
 			}
->>>>>>> a4336a1... brun rv with the wrong ingredient@
 			for(String e:tlist) {
 				if(!list.containsValue(e)) {
 					list.put(llen, urlfix(e));
