@@ -1,6 +1,7 @@
 package bkd;
 import java.io.*;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.util.HashSet;
@@ -150,7 +151,7 @@ public class Main {
 	static void map(int re) throws IOException{
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
-		String html;
+		Document html;
 		int retries = 0;
 		String turl = "";
 		for(long i = 0; i < re; i++) {
@@ -167,14 +168,14 @@ public class Main {
 			}
 			HashSet<String> tlist = new HashSet<>();
 			try {
-				html = Jsoup.connect(turl).get().html();
+				html = Jsoup.connect(turl).get();
 			} catch(Exception ex) {
 				System.out.println("Unable to reach: " + turl);
 				i--;
 				continue;
 				//return;
 			}
-			for(Element e:Jsoup.parse(html).select("a[herf]")) {
+			for(Element e:html.select("a[herf]")) {
 				String nlink = urlfix(urlmerge(e.attr("href"), turl));
 				if(nlink.length() == 0)continue;
 				tlist.add(nlink);
