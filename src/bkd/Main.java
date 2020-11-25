@@ -29,18 +29,18 @@ public class Main {
 		if(!new File(dir).isDirectory()) {
 			new File(dir).mkdir();
 		}
-		
+		/*
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
 		String st = s.readLine();
 		s.close();
 		args = st.split(" ");
-		
+		*/
 		dir+=args[0];
 		Runtime.getRuntime().addShutdownHook(new shutdown());
 		cmds(args);
 	}
 	static void cmds(String[] args) throws IOException{
-		outer:
+		//outer:
 		for(int i = 1; i < args.length; i++) {
 			if(args[i].charAt(0)!='-') {
 				System.out.println("Must choose a mode");
@@ -67,7 +67,7 @@ public class Main {
 					for(i += 0; i < args.length; i++) {
 						if(args[i].charAt(0)=='-') {
 							i--;
-							continue outer;
+							break;
 						}
 						list.put(llen,args[i]);
 						llen++;
@@ -109,11 +109,11 @@ public class Main {
 			new File(dir+".map").createNewFile();
 			return;
 		}
-		if(!new File(dir+".q").isFile()) {
+		if(!new File(dir+".q").isFile() && lstart == 1) {
 			System.out.println("Queue location file not found. Reprocessing...");
 			lstart = recoverq();
 		}
-		else {
+		else if(lstart == 1){
 			BufferedReader q = new BufferedReader(new FileReader(dir+".q"));
 			String qst = q.readLine();
 			q.close();
@@ -232,7 +232,7 @@ public class Main {
 				if(nlink.equals(""))continue;
 				tlist.add(nlink);
 			}
-			System.out.println(tlist.size());
+			//System.out.println(tlist.size());
 			for(String e:tlist) {
 				if(!list.containsValue(e)) {
 					list.put(llen, e);
