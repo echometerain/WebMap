@@ -16,6 +16,12 @@ public class Main {
 	public static int lstart = 1;
 	private static String sl = "/";
 	public static String dir = System.getProperty("user.dir");
+	/*
+	private static HashSet<String> lexclude = new HashSet<>();
+	private static HashSet<String> linclude = new HashSet<>();
+	private static HashSet<String> qexclude = new HashSet<>();
+	private static HashSet<String> qinclude = new HashSet<>();
+	*/
 	public static void main(String[] args) throws IOException {
 		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
@@ -30,30 +36,63 @@ public class Main {
 		args = st.split(" ");
 		
 		dir+=args[0];
-		if(new File(dir+".index").isFile()) {
-			load();
-			System.out.print("Loading...\r");
-		}else {
-			new File(dir+".index").createNewFile();
-			new File(dir+".map").createNewFile();
-		}
 		Runtime.getRuntime().addShutdownHook(new shutdown());
-		int n = 0;
-		try {
-		n = Integer.parseInt(args[1]);
-		}catch(NumberFormatException e) {
-			
-			System.out.println("Repetition size must be a number");
-		}
-		for(int i = 2; i < args.length; i++) {
-			list.put(llen,args[i]);
-			llen++;
-		}
-		
-		map(n);
+		cmds(args);
 	}
-	static void cmds(String[] args) {
-		
+	static void cmds(String[] args) throws IOException{
+		outer:
+		for(int i = 1; i < args.length; i++) {
+			if(args[i].charAt(0)!='-') {
+				System.out.println("Must choose a mode");
+			}
+			if(args[i].charAt(1)=='-') {
+				switch(args[i]) {
+				case "--i":
+					break;
+				}
+			}
+			else {
+				switch(args[i]) {
+				case "-i":
+					int n = 0;
+					try {
+						i++;
+						n = Integer.parseInt(args[i]);
+						i++;
+					}catch(NumberFormatException e) {
+						System.out.println("Repetition size must be a number");
+						return;
+					}
+					load();
+					for(i += 0; i < args.length; i++) {
+						if(args[i].charAt(0)=='-') {
+							i--;
+							continue outer;
+						}
+						list.put(llen,args[i]);
+						llen++;
+					}
+					map(n);
+					break;
+				case "-j":
+					importr();
+					break;
+				case "-e":
+					export();
+					break;
+				case "-q":
+					break;
+				case "-g":
+					break;
+				}
+			}
+		}
+	}
+	static boolean legal(String url) {
+		return false;
+	}
+	static boolean query(String url) {
+		return false;
 	}
 	static int recoverq() throws IOException{
 		int start = 1;
@@ -65,6 +104,11 @@ public class Main {
 		return start;
 	}
 	static void load() throws IOException{
+		if(!new File(dir+".index").isFile()) {
+			new File(dir+".index").createNewFile();
+			new File(dir+".map").createNewFile();
+			return;
+		}
 		if(!new File(dir+".q").isFile()) {
 			System.out.println("Queue location file not found. Reprocessing...");
 			lstart = recoverq();
@@ -80,10 +124,6 @@ public class Main {
 				lstart = recoverq();
 			}
 			lstart = Integer.parseInt(qst);
-		}
-		if(!new File(dir+".index").isFile()) {
-			System.out.println("Index not found.");
-			return;
 		}
 		if(!new File(dir+".map").isFile()) {
 			System.out.println("Map not found. Recompute?");
@@ -111,26 +151,29 @@ public class Main {
 		reader.close();
 		String[] arr = st.split("([\\[\\]])");
 		for(int i = 0; i < arr.length-1; i+=2) {
-			HashSet<String> llinks = new HashSet<>();
+			if(i==0) {
+				list.put(lstart, arr[i].split("\"")[1]);
+				lstart++;
+				writein.append(arr[i].split("\"")[1]+"\n");
+			}
 			String[] ar2 = arr[i+1].split("\"");
-			String key = arr[i].split("\"")[1];
-			list.put(lstart, key);
-			lstart++;
-			writein.append(key+"\n");
+			HashSet<String> llinks = new HashSet<>();
 			for(int ii = 1; ii < ar2.length-1; ii+=2) {
 				llinks.add(ar2[ii]);
-				list.put(lstart, ar2[ii]);
-				lstart++;
-				writein.append(ar2[ii]+"\n");
+				if(!list.containsValue(ar2[ii])) {
+					list.put(lstart, ar2[ii]);
+					lstart++;
+					writein.append(ar2[ii]+"\n");
+				}
 			}
-			writemap.append(arr[i].split("\"")[1]);
 			for(String e:llinks) {
-				writemap.append(" "+list.getKey(e));
+				writemap.append(list.getKey(e)+" ");
 			}
 			writemap.append("\n");
 		}
 		writemap.close();
 		writein.close();
+		System.out.println("Finished importing");
 	}
 	static void export() throws IOException {
 		load();
@@ -143,7 +186,12 @@ public class Main {
 			st += "\""+list.get(count)+"\":[";
 			count++;
 			for(String e2:s.split(" ")) {
-				st += "\""+e2+"\",";
+				if(e2.equals("")) continue;
+				try {
+				st += "\""+list.get(Integer.parseInt(e2))+"\",";
+				}catch(NumberFormatException ex){
+					System.out.println("Map file should only contain numbers");
+				}
 			}
 			if(st.charAt(st.length()-1)==',')st.substring(0, st.length()-1);
 			st += "],\n";
@@ -151,10 +199,10 @@ public class Main {
 		reader.close();
 		if(st.charAt(st.length()-2)==',')st.substring(0, st.length()-2);
 		if(st != null)st += "}";
-		FileWriter writer = new FileWriter(dir + "map.json");
+		FileWriter writer = new FileWriter(dir + ".json");
 		writer.write(st);
 		writer.close();
-		System.out.println("Finished.");
+		System.out.println("Finished exporting");
 	}
 	static void map(int re) throws IOException{
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
