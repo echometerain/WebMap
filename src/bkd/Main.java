@@ -13,7 +13,6 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 public class Main {
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
-	//public static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	private static int llen = 1;
 	private static HtmlCleaner cleaner = new HtmlCleaner();
 	public static int lstart = 1;
@@ -155,11 +154,8 @@ public class Main {
 	static void map(int re) throws IOException{
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
-<<<<<<< HEAD
-		TagNode root;
-		int retries = 0;
-		String turl = "";
 =======
+		Document html;
 		try {
 >>>>>>> parent of a4336a1... brun rv with the wrong ingredient@
 		for(long i = 0; i < re; i++) {
@@ -175,15 +171,18 @@ public class Main {
 				return;
 			}
 			HashSet<String> tlist = new HashSet<>();
-			Document html;
 			try {
 <<<<<<< HEAD
 				root = cleaner.clean(turl);
 				//turl = html.location();
 =======
 				html = Jsoup.connect(turl).get();
+<<<<<<< HEAD
 				turl = html.location();
 >>>>>>> parent of a4336a1... brun rv with the wrong ingredient@
+=======
+				//turl = html.location();
+>>>>>>> a4336a1... brun rv with the wrong ingredient@
 			} catch(Exception ex) {
 				System.out.println("Unable to reach: " + turl);
 				i--;
@@ -208,15 +207,23 @@ public class Main {
 			//System.out.println(turl);
 =======
 			for(Element e:html.select("a[href]")) {
-				String nlink = urlmerge(e.attr("href"), turl);
-				if(nlink.equals(""))continue;
+				String nlink = urlfix(urlmerge(e.attr("href"), turl));
+				if(nlink.length() == 0)continue;
 				tlist.add(nlink);
 			}
+<<<<<<< HEAD
 			System.out.println(tlist.size());
 >>>>>>> parent of a4336a1... brun rv with the wrong ingredient@
+=======
+			if(tlist.size() == 0) {
+				lstart--;
+				i--;
+				continue;
+			}
+>>>>>>> a4336a1... brun rv with the wrong ingredient@
 			for(String e:tlist) {
 				if(!list.containsValue(e)) {
-					list.put(llen, e);
+					list.put(llen, urlfix(e));
 					llen++;
 					writein.append(e+"\n");
 				}
@@ -229,14 +236,8 @@ public class Main {
 		writemap.close();
 	}
 	static String urlmerge(String url, String lurl) {
-		if(url.length() == 0) return lurl;
+		if(url.length() == 0) return "";
 		String[] parts = lurl.split("/");
-		while(true) {
-			if(url.charAt(0) == '\r'||url.charAt(0) == '\t'||url.charAt(0) == '\n'||url.charAt(0) == ' ') {
-				url = url.substring(1);
-			}
-			else break;
-		}
 		try {
 			if(url.startsWith("http:")||url.startsWith("https:")) return url;
 			if(url.contains(":")) return "";
@@ -281,6 +282,23 @@ public class Main {
 		}
 		url = lurl + url;
 		//System.out.println(url);
+		return url;
+	}
+	static String urlfix(String url) {
+		if(url.length()==0)return "";
+		char sta;
+		char end;
+		while(true) {
+			sta = url.charAt(0);
+			end = url.charAt(url.length()-1);
+			if(sta == '\r'||sta == '\t'||sta == '\n'||sta == ' ') {
+				url = url.substring(1);
+			}
+			else if(end == '\r'||end == '\t'||end == '\n'||end == ' ') {
+				url = url.substring(0, url.length()-1);
+			}
+			else break;
+		}
 		return url;
 	}
 }
