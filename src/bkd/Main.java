@@ -132,13 +132,12 @@ public class Main {
 			BufferedReader q = new BufferedReader(new FileReader(dir+".q"));
 			String qst = q.readLine();
 			q.close();
-			try {
-				Integer.parseInt(qst);
-			}catch(NumberFormatException ex) {
+			if(qst.matches("\\d+")) {
+				lstart = Integer.parseInt(qst);
+			}else{
 				System.out.println("Queue location file currupted. Reprocessing...");
 				lstart = recoverq();
 			}
-			lstart = Integer.parseInt(qst);
 		}
 		if(!new File(dir+".map").isFile()) {
 			System.out.println("Map not found. Recompute?");
@@ -223,7 +222,7 @@ public class Main {
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
 		try {
-		for(long i = 0; i < re; i++) {
+		for(long i = 0; i < re && re!=-2; i++) {
 			String turl = list.get(lstart);
 			//System.out.println(turl);
 			lstart++;
