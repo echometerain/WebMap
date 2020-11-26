@@ -4,7 +4,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 
 import java.util.HashSet;
-import java.util.NoSuchElementException;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -152,9 +151,10 @@ public class Main {
 	}
 	static void importr() throws IOException {
 		BufferedReader reader;
-		try {
+		if(new File(dir+".json").isFile()) {
 			reader = new BufferedReader(new FileReader(dir+".json"));
-		}catch(FileNotFoundException ex) {
+		}
+		else{
 			System.out.println("json not found");
 			return;
 		}
@@ -201,10 +201,13 @@ public class Main {
 			count++;
 			for(String e2:s.split(" ")) {
 				if(e2.equals("")) continue;
-				try {
-				st += "\""+list.get(Integer.parseInt(e2))+"\",";
-				}catch(NumberFormatException ex){
+				if(e2.matches("\\d+")){
+					st += "\""+list.get(Integer.parseInt(e2))+"\",";
+				}
+				else{
 					System.out.println("Map file should only contain numbers");
+					reader.close();
+					return;
 				}
 			}
 			if(st.charAt(st.length()-1)==',')st.substring(0, st.length()-1);
@@ -221,8 +224,13 @@ public class Main {
 	static void map(int re) throws IOException{
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
-		try {
 		for(long i = 0; i < re && re!=-2; i++) {
+			if(!list.containsKey(lstart)) {
+				System.out.println("Reached the end");
+				writein.close();
+				writemap.close();
+				return;
+			}
 			String turl = list.get(lstart);
 			//System.out.println(turl);
 			lstart++;
@@ -258,12 +266,6 @@ public class Main {
 			writemap.append("\n");
 			System.out.print((i+1)+"/"+re+" complete\r");
 		}
-		}catch(NoSuchElementException ex) {
-			System.out.println("Reached the end");
-			writein.close();
-			writemap.close();
-			return;
-		}
 		writein.close();
 		writemap.close();
 	}
@@ -276,11 +278,9 @@ public class Main {
 			}
 			else break;
 		}
-		try {
-			if(url.startsWith("http:")||url.startsWith("https:")) return url;
-			if(url.contains(":")) return "";
-			if(url.startsWith("//")) return parts[0]+url;
-		}catch(Exception ignored) {}
+		if(url.startsWith("http:")||url.startsWith("https:")) return url;
+		if(url.contains(":")) return "";
+		if(url.startsWith("//")) return parts[0]+url;
 		if(url.charAt(0) == '#'||url.charAt(0) == '?'||url.charAt(0) == '&') {
 			return lurl+url;
 		}
