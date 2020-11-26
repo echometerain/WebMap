@@ -6,15 +6,15 @@ A program that takes a webpage, takes all of its embeded links, and recursively 
 
 Compiled .jar:
 
-    java -jar WebCrawler.jar (SessionName) (Mode) (RecursionAmount) (URLs)
+    java -jar WebCrawler.jar (SessionName) (Mode) (Iterations) (URLs)
 
 Compiled .exe:
 
-    crawl (SessionName) (Mode) (RecursionAmount) (URLs)
+    crawl (SessionName) (Mode) (Iterations) (URLs)
   
 A session can be named whatever you want, and inputting the name of a previous session would use that session (if it exists in /Data).
 
-RecursionAmount must be integer. It determines how many sites the program will process.
+Iterations must be integer. It determines how many sites the program will process.
 
 Multiple URLs could be placed at the end with a space seperator. It adds urls to a new or existing queue.
  
