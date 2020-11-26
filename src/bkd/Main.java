@@ -29,12 +29,12 @@ public class Main {
 		if(!new File(dir).isDirectory()) {
 			new File(dir).mkdir();
 		}
-		/*
+		
 		BufferedReader s = new BufferedReader(new InputStreamReader(System.in));
 		String st = s.readLine();
 		s.close();
 		args = st.split(" ");
-		*/
+		
 		dir+=args[0];
 		Runtime.getRuntime().addShutdownHook(new shutdown());
 		cmds(args);
