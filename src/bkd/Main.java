@@ -10,6 +10,8 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 public class Main {
+	private static enum Modes{n, i, j, e, q, g, s, r, u}
+	private static enum Tasks{i, j, e, g, r}
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	//public static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	private static int llen = 1;
@@ -40,19 +42,22 @@ public class Main {
 		cmds(args);
 	}
 	static void cmds(String[] args) throws IOException{
+		Modes mode = Modes.n;
 		//outer:
 		for(int i = 1; i < args.length; i++) {
-			if(args[i].charAt(0)!='-') {
-				System.out.println("Must choose a mode");
-			}
-			if(args[i].charAt(1)=='-') {
-				switch(args[i]) {
-				case "--i":
+			if(args[i].charAt(0)=='-'&&args[i].charAt(1)=='-') {
+				switch(mode) {
+				case i:
+					break;
+				default:
 					break;
 				}
 			}
-			else {
-				switch(args[i]) {
+			else if(args[i].charAt(0)=='-') {
+				char m = args[i].toLowerCase().charAt(i);
+				mode = Modes.valueOf(m+"");
+				
+				switch(args[i].toLowerCase()) {
 				case "-i":
 					int n = 0;
 					try {
@@ -84,9 +89,19 @@ public class Main {
 					break;
 				case "-g":
 					break;
+				case "-s":
+					break;
+				case "-r":
+					break;
+				case "-u":
+					break;
 				}
 			}
+			else {
+				
+			}
 		}
+		
 	}
 	static boolean legal(String url) {
 		return false;
