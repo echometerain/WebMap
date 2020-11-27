@@ -12,9 +12,10 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 public class Main {
-	private static enum Modes{n, i, j, e, g, r, d, q, s, u,}
+	private static enum Modes{n, i, j, e, g, r, q, s, u,}
 	private static enum Submodes{n, include, exclude, media, nolink, script}
-	private static enum Tasks{i, j, e, g, r, d}// d for dir
+	private static enum Tasks{i, j, e, g, r}// d for dir
+	private static enum Strs{i, r, d, q, u}
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	//public static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	private static int llen = 1;
@@ -47,6 +48,7 @@ public class Main {
 		Modes mode = Modes.n;
 		Submodes smode = Submodes.n;
 		int re = 0;
+		int qre = 0;
 		boolean strnext = false;
 		//outer:
 		for(int i = 1; i < args.length; i++) {
@@ -72,18 +74,34 @@ public class Main {
 				String m = args[i].toLowerCase().charAt(i)+"";
 				mode = Modes.valueOf(m);
 				boolean con = false;
-				for(Tasks e:Tasks.values()) {
+				for(Modes e:Modes.values()) {
 					if(m.equals(e.toString())) {
 						con = true;
 						break;
 					}
 				}
-				if(con) tasq.add(Tasks.valueOf(m));
-				if(mode == Modes.s || mode == Modes.u) strnext = true;
+				if(con) mode = Modes.valueOf(m);
 				else {
 					System.out.println("Syntax error at: \"" + args[i] + "\"");
 					return;
 				}
+				boolean c2 = false;
+				for(Tasks e:Tasks.values()) {
+					if(m.equals(e.toString())) {
+						c2 = true;
+						break;
+					}
+				}
+				if(c2)tasq.add(Tasks.valueOf(m));
+				boolean c3 = false;
+				for(Strs e:Strs.values()) {
+					if(m.equals(e.toString())) {
+						c2 = true;
+						break;
+					}
+				}
+				if(c3)strnext = true;
+				else strnext = false;
 			}
 			else if(strnext) {
 				switch(mode) {
@@ -104,8 +122,6 @@ public class Main {
 				case r:
 					break;
 				case u:
-					break;
-				case d:
 					break;
 				}
 			}
@@ -130,8 +146,6 @@ public class Main {
 			case g:
 				break;
 			case r:
-				break;
-			case d:
 				break;
 			}
 			
