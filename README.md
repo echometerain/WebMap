@@ -22,6 +22,8 @@ Multiple URLs could be placed at the end with a space seperator. It adds urls to
  - -i index (this will autosave files in Data directory)
  - -e export .json (stored in (session name).json in \Data)
  - -j import .json
+ - -r recompute (not implemented)
+ - -s scopes (not implemented)
  - -q query (not implemented)
  - -g graph (not implemented)
  
