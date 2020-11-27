@@ -2,27 +2,29 @@ package bkd;
 import java.io.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.jsoup.HttpStatusException;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 public class Main {
-	private static enum Modes{n, i, j, e, q, g, s, r, u}
-	private static enum Tasks{i, j, e, g, r}
+	private static enum Modes{n, i, j, e, g, r, d, q, s, u,}
+	private static enum Submodes{n, include, exclude, media, nolink, script}
+	private static enum Tasks{i, j, e, g, r, d}// d for dir
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	//public static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	private static int llen = 1;
 	public static int lstart = 1;
 	private static String sl = "/";
 	public static String dir = System.getProperty("user.dir");
-	/*
 	private static HashSet<String> lexclude = new HashSet<>();
 	private static HashSet<String> linclude = new HashSet<>();
 	private static HashSet<String> qexclude = new HashSet<>();
 	private static HashSet<String> qinclude = new HashSet<>();
-	*/
 	public static void main(String[] args) throws IOException {
 		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
@@ -41,66 +43,99 @@ public class Main {
 		cmds(args);
 	}
 	static void cmds(String[] args) throws IOException{
+		Queue<Tasks> tasq = new LinkedList<>();
 		Modes mode = Modes.n;
+		Submodes smode = Submodes.n;
+		int re = 0;
+		boolean strnext = false;
 		//outer:
 		for(int i = 1; i < args.length; i++) {
 			if(args[i].charAt(0)=='-'&&args[i].charAt(1)=='-') {
-				switch(mode) {
-				case i:
-					break;
-				default:
-					break;
+				String tsm = args[i].toLowerCase().substring(2);
+				boolean con = false;
+				for(Submodes e:Submodes.values()) {
+					if(tsm.equals(e.toString()) && tsm+"" != "n") {
+						con = true;
+						break;
+					}
+				}
+				if(con) smode = Submodes.valueOf(tsm);
+				if(smode == Submodes.include || smode == Submodes.exclude) {
+					strnext = true;
+				}
+				else {
+					System.out.println("Syntax error at: \"" + args[i] + "\"");
+					return;
 				}
 			}
 			else if(args[i].charAt(0)=='-') {
-				char m = args[i].toLowerCase().charAt(i);
-				mode = Modes.valueOf(m+"");
-				
-				switch(args[i].toLowerCase()) {
-				case "-i":
-					int n = 0;
-					try {
-						i++;
-						n = Integer.parseInt(args[i]);
-						i++;
-					}catch(NumberFormatException e) {
-						System.out.println("Repetition size must be a number");
-						return;
+				String m = args[i].toLowerCase().charAt(i)+"";
+				mode = Modes.valueOf(m);
+				boolean con = false;
+				for(Tasks e:Tasks.values()) {
+					if(m.equals(e.toString())) {
+						con = true;
+						break;
 					}
-					load();
-					for(i += 0; i < args.length; i++) {
-						if(args[i].charAt(0)=='-') {
-							i--;
-							break;
-						}
-						list.put(llen,args[i]);
-						llen++;
-					}
-					map(n);
+				}
+				if(con) tasq.add(Tasks.valueOf(m));
+				if(mode == Modes.s || mode == Modes.u) strnext = true;
+				else {
+					System.out.println("Syntax error at: \"" + args[i] + "\"");
+					return;
+				}
+			}
+			else if(strnext) {
+				switch(mode) {
+				case n:
 					break;
-				case "-j":
-					importr();
+				case i:
 					break;
-				case "-e":
-					export();
+				case j:
 					break;
-				case "-q":
+				case e:
 					break;
-				case "-g":
+				case q:
 					break;
-				case "-s":
+				case g:
 					break;
-				case "-r":
+				case s:
 					break;
-				case "-u":
+				case r:
+					break;
+				case u:
+					break;
+				case d:
 					break;
 				}
 			}
 			else {
-				
+				System.out.println("Syntax error at: \"" + args[i] + "\"");
+				return;
 			}
 		}
-		
+		while (!tasq.isEmpty()) {
+			Tasks mod = tasq.poll();
+			switch(mod) {
+			case i:
+				load();
+				//map(n);
+				break;
+			case j:
+				importr();
+				break;
+			case e:
+				export();
+				break;
+			case g:
+				break;
+			case r:
+				break;
+			case d:
+				break;
+			}
+			
+		}
 	}
 	static boolean legal(String url) {
 		return false;
@@ -133,7 +168,11 @@ public class Main {
 			q.close();
 			if(qst.matches("\\d+")) {
 				lstart = Integer.parseInt(qst);
-			}else{
+			}
+			else if(qst.equals("-2")) {
+				lstart = -2;
+			}
+			else{
 				System.out.println("Queue location file currupted. Reprocessing...");
 				lstart = recoverq();
 			}
@@ -243,7 +282,7 @@ public class Main {
 			String html;
 			try {
 				html = Jsoup.connect(turl).get().html();
-			} catch(Exception ex) {
+			} catch(HttpStatusException ex) {
 				System.out.println("Unable to reach: " + turl);
 				i--;
 				continue;
@@ -252,6 +291,8 @@ public class Main {
 			for(Element e:Jsoup.parse(html).select("a[href]")) {
 				String nlink = urlmerge(e.attr("href"), turl);
 				if(nlink.equals(""))continue;
+				String lsub = nlink.substring(0, nlink.length()-1);
+				if(list.containsValue(lsub)) nlink = lsub;
 				tlist.add(nlink);
 			}
 			//System.out.println(tlist.size());
@@ -279,12 +320,13 @@ public class Main {
 			else break;
 		}
 		if(url.startsWith("http:")||url.startsWith("https:")) return url;
+		if(url.split(":").length == 8)
 		if(url.contains(":")) return "";
 		if(url.startsWith("//")) return parts[0]+url;
 		if(url.charAt(0) == '#'||url.charAt(0) == '?'||url.charAt(0) == '&') {
 			return lurl+url;
 		}
-		try {
+		if(parts.length<3) return "";
 		if(url.charAt(0) == '/') {
 			lurl = parts[0]+"//"+parts[2];
 		}
@@ -311,7 +353,6 @@ public class Main {
 				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
 			}
 		}
-		}catch(StringIndexOutOfBoundsException ex) {}
 		if(lurl.charAt(lurl.length()-1) == '/') {
 			lurl = lurl.substring(0, lurl.length()-1);
 		}
