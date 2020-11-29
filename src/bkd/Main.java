@@ -12,10 +12,11 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 public class Main {
-	private static enum Modes{n, i, j, e, g, r, q, s, u,}
-	private static enum Submodes{n, include, exclude, media, nolink, script}
+	private static enum Modes{n, i, j, e, g, r, q, s, u}
+	private static enum Lmodes{name, index, json, export, graph, recompute, query, scope, url}
+	private static enum Submodes{na, include, exclude, media, nolink, script}
 	private static enum Tasks{i, j, e, g, r}// d for dir
-	private static enum Strs{i, r, d, q, u}
+	private static enum Strs{i, r, q, u}
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	//public static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	private static int llen = 1;
@@ -39,73 +40,62 @@ public class Main {
 		s.close();
 		args = st.split(" ");
 		
-		dir+=args[0];
 		Runtime.getRuntime().addShutdownHook(new shutdown());
 		cmds(args);
 	}
 	static void cmds(String[] args) throws IOException{
 		Queue<Tasks> tasq = new LinkedList<>();
+		Queue<String> dirq = new LinkedList<>();
 		Modes mode = Modes.n;
-		Submodes smode = Submodes.n;
+		Submodes smode = Submodes.na;
 		int re = 0;
 		int qre = 0;
 		boolean strnext = false;
 		//outer:
 		for(int i = 1; i < args.length; i++) {
-			if(args[i].charAt(0)=='-'&&args[i].charAt(1)=='-') {
-				String tsm = args[i].toLowerCase().substring(2);
-				boolean con = false;
-				for(Submodes e:Submodes.values()) {
-					if(tsm.equals(e.toString()) && tsm+"" != "n") {
-						con = true;
-						break;
+			args[i] = args[i].toLowerCase();
+			if(args[i].charAt(0)=='-') {
+				String m = "";
+				try {
+					if(args[i].charAt(1)=='-') {
+						m = args[i].substring(2);
+						Lmodes.valueOf(m);
+						mode = Modes.valueOf(m.charAt(0)+"");
+					}else {
+						m = args[i].substring(1);
+						mode = Modes.valueOf(m);
 					}
-				}
-				if(con) smode = Submodes.valueOf(tsm);
-				if(smode == Submodes.include || smode == Submodes.exclude) {
-					strnext = true;
-				}
-				else {
+				}catch(IllegalArgumentException ex){
 					System.out.println("Syntax error at: \"" + args[i] + "\"");
 					return;
 				}
-			}
-			else if(args[i].charAt(0)=='-') {
-				String m = args[i].toLowerCase().charAt(i)+"";
 				mode = Modes.valueOf(m);
-				boolean con = false;
-				for(Modes e:Modes.values()) {
-					if(m.equals(e.toString())) {
-						con = true;
-						break;
-					}
-				}
-				if(con) mode = Modes.valueOf(m);
-				else {
+				try {
+					mode = Modes.valueOf(m);
+				}catch(IllegalArgumentException ex){
 					System.out.println("Syntax error at: \"" + args[i] + "\"");
 					return;
 				}
-				boolean c2 = false;
-				for(Tasks e:Tasks.values()) {
-					if(m.equals(e.toString())) {
-						c2 = true;
-						break;
+				
+				try {
+					tasq.add(Tasks.valueOf(m));
+				}
+				finally {
+					try {
+						Strs.valueOf(m);
+						strnext = true;
+					}catch(IllegalArgumentException ex){
+						strnext = false;
 					}
 				}
-				if(c2)tasq.add(Tasks.valueOf(m));
-				boolean c3 = false;
-				for(Strs e:Strs.values()) {
-					if(m.equals(e.toString())) {
-						c2 = true;
-						break;
-					}
-				}
-				if(c3)strnext = true;
-				else strnext = false;
 			}
-			else if(strnext) {
+			else{
+				try {
+					smode = Submodes.valueOf(args[i]);
+				}catch(IllegalArgumentException ex){}
 				switch(mode) {
 				case n:
+					dir = System.getProperty("user.dir")+dir+sl+"Data"+sl+args[i];
 					break;
 				case i:
 					break;
@@ -124,10 +114,6 @@ public class Main {
 				case u:
 					break;
 				}
-			}
-			else {
-				System.out.println("Syntax error at: \"" + args[i] + "\"");
-				return;
 			}
 		}
 		while (!tasq.isEmpty()) {
