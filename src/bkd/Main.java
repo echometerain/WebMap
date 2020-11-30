@@ -14,11 +14,10 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 public class Main {
 	private static enum Modes{n, i, j, e, g, r, q, s, u}
 	private static enum Lmodes{name, index, json, export, graph, recompute, query, scope, url}
-	private static enum Submodes{na, include, exclude, media, nolink, script}
+	private static enum Submodes{include, exclude, media, nolink, script}
 	private static enum Tasks{i, j, e, g, r}// d for dir
 	private static enum Strs{i, r, q, u}
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
-	//public static HashMap<String, LinkedList<String>> map = new HashMap<>();
 	private static int llen = 1;
 	public static int lstart = 1;
 	private static String sl = "/";
@@ -47,11 +46,11 @@ public class Main {
 		Queue<Tasks> tasq = new LinkedList<>();
 		Queue<String> dirq = new LinkedList<>();
 		Modes mode = Modes.n;
-		Submodes smode = Submodes.na;
+		Submodes smode = null;
 		int re = 0;
 		int qre = 0;
 		boolean strnext = false;
-		//outer:
+		outer:
 		for(int i = 1; i < args.length; i++) {
 			args[i] = args[i].toLowerCase();
 			if(args[i].charAt(0)=='-') {
@@ -70,6 +69,7 @@ public class Main {
 					return;
 				}
 				mode = Modes.valueOf(m);
+				smode = null;
 				try {
 					mode = Modes.valueOf(m);
 				}catch(IllegalArgumentException ex){
@@ -91,13 +91,19 @@ public class Main {
 			}
 			else{
 				try {
+					if(mode == null || mode == Modes.n)continue outer;
 					smode = Submodes.valueOf(args[i]);
+					continue outer;
 				}catch(IllegalArgumentException ex){}
 				switch(mode) {
 				case n:
 					dir = System.getProperty("user.dir")+dir+sl+"Data"+sl+args[i];
+					smode = null;
 					break;
 				case i:
+					if(smode == Submodes.exclude) {
+						
+					}
 					break;
 				case j:
 					break;
