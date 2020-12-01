@@ -4,6 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.jsoup.HttpStatusException;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -12,11 +13,16 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 public class Main {
-	private static enum Modes{n, i, j, e, g, r, q, s, u}
-	private static enum Lmodes{name, index, json, export, graph, recompute, query, scope, url}
-	private static enum Submodes{include, exclude, media, nolink, script}
-	private static enum Tasks{i, j, e, g, r}// d for dir
-	private static enum Strs{i, r, q, u}
+	private static HashSet<Character> modes = new HashSet<>(Arrays.asList(
+			new Character[]{'n', 'i', 'j', 'e', 'g', 'r', 'q', 's', 'u'}));
+	private static HashSet<String> lmodes = new HashSet<>(Arrays.asList(
+			new String[]{"name", "index", "json", "export", "graph", "recompute", "query", "scope", "url"}));
+	private static HashSet<String> sub = new HashSet<>(Arrays.asList(
+			new String[]{"include", "exclude", "media", "nolink", "script"}));
+	private static HashSet<Character> tasks = new HashSet<>(Arrays.asList(
+			new Character[]{'n', 'i', 'j', 'e', 'g'}));// d for dir
+	private static HashSet<String> strs = new HashSet<>(Arrays.asList(
+			new String[] {"i", "r", "q", "u"}));
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	private static int llen = 1;
 	public static int lstart = 1;
@@ -101,7 +107,13 @@ public class Main {
 					smode = null;
 					break;
 				case i:
-					if(smode == Submodes.exclude) {
+					if(smode == Submodes.include) {
+						
+					}
+					else if(smode == Submodes.exclude) {
+						
+					}
+					else {
 						
 					}
 					break;
