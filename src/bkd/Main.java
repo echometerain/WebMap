@@ -49,10 +49,10 @@ public class Main {
 		cmds(args);
 	}
 	static void cmds(String[] args) throws IOException{
-		Queue<Tasks> tasq = new LinkedList<>();
+		Queue<String> tasq = new LinkedList<>();
 		Queue<String> dirq = new LinkedList<>();
-		Modes mode = Modes.n;
-		Submodes smode = null;
+		char mode = 'n';
+		String smode = null;
 		int re = 0;
 		int qre = 0;
 		boolean strnext = false;
@@ -61,15 +61,14 @@ public class Main {
 			args[i] = args[i].toLowerCase();
 			if(args[i].charAt(0)=='-') {
 				String m = "";
-				try {
-					if(args[i].charAt(1)=='-') {
-						m = args[i].substring(2);
-						Lmodes.valueOf(m);
-						mode = Modes.valueOf(m.charAt(0)+"");
-					}else {
-						m = args[i].substring(1);
-						mode = Modes.valueOf(m);
-					}
+				if(args[i].charAt(1)=='-') {
+					m = args[i].substring(2);
+					Lmodes.valueOf(m);
+					mode = Modes.valueOf(m.charAt(0)+"");
+				}else {
+					m = args[i].substring(1);
+					mode = args[i].charAt(1);
+				}
 				}catch(IllegalArgumentException ex){
 					System.out.println("Syntax error at: \"" + args[i] + "\"");
 					return;
