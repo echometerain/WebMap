@@ -60,28 +60,24 @@ public class Main {
 		for(int i = 1; i < args.length; i++) {
 			args[i] = args[i].toLowerCase();
 			if(args[i].charAt(0)=='-') {
-				String m = "";
 				if(args[i].charAt(1)=='-') {
-					m = args[i].substring(2);
-					Lmodes.valueOf(m);
-					mode = Modes.valueOf(m.charAt(0)+"");
+					if(lmodes.contains(args[i].substring(2))){
+						mode = args[i].charAt(2);
+					}
+					else {
+						System.out.println("Syntax error at: \"" + args[i] + "\"");
+						return;
+					}
 				}else {
-					m = args[i].substring(1);
-					mode = args[i].charAt(1);
+					if(modes.contains(args[i].charAt(1))) {
+						mode = args[i].charAt(1);
+					}
+					else {
+						System.out.println("Syntax error at: \"" + args[i] + "\"");
+						return;
+					}
 				}
-				}catch(IllegalArgumentException ex){
-					System.out.println("Syntax error at: \"" + args[i] + "\"");
-					return;
-				}
-				mode = Modes.valueOf(m);
 				smode = null;
-				try {
-					mode = Modes.valueOf(m);
-				}catch(IllegalArgumentException ex){
-					System.out.println("Syntax error at: \"" + args[i] + "\"");
-					return;
-				}
-				
 				try {
 					tasq.add(Tasks.valueOf(m));
 				}
