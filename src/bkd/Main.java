@@ -49,7 +49,7 @@ public class Main {
 		cmds(args);
 	}
 	static void cmds(String[] args) throws IOException{
-		Queue<String> tasq = new LinkedList<>();
+		Queue<Character> tasq = new LinkedList<>();
 		Queue<String> dirq = new LinkedList<>();
 		char mode = 'n';
 		String smode = null;
@@ -78,17 +78,10 @@ public class Main {
 					}
 				}
 				smode = null;
-				try {
-					tasq.add(Tasks.valueOf(m));
+				if(tasks.contains(mode)) {
+					tasq.add(mode);
 				}
-				finally {
-					try {
-						Strs.valueOf(m);
-						strnext = true;
-					}catch(IllegalArgumentException ex){
-						strnext = false;
-					}
-				}
+				strnext = strs.contains(mode) ? true : false;
 			}
 			else{
 				try {
@@ -97,11 +90,11 @@ public class Main {
 					continue outer;
 				}catch(IllegalArgumentException ex){}
 				switch(mode) {
-				case n:
+				case 'n':
 					dir = System.getProperty("user.dir")+dir+sl+"Data"+sl+args[i];
 					smode = null;
 					break;
-				case i:
+				case 'i':
 					if(smode == Submodes.include) {
 						
 					}
@@ -112,39 +105,39 @@ public class Main {
 						
 					}
 					break;
-				case j:
+				case 'j':
 					break;
-				case e:
+				case 'e':
 					break;
-				case q:
+				case 'q':
 					break;
-				case g:
+				case 'g':
 					break;
-				case s:
+				case 's':
 					break;
-				case r:
+				case 'r':
 					break;
-				case u:
+				case 'u':
 					break;
 				}
 			}
 		}
 		while (!tasq.isEmpty()) {
-			Tasks mod = tasq.poll();
+			char mod = tasq.poll();
 			switch(mod) {
-			case i:
+			case 'i':
 				load();
 				//map(n);
 				break;
-			case j:
+			case 'j':
 				importr();
 				break;
-			case e:
+			case 'e':
 				export();
 				break;
-			case g:
+			case 'g':
 				break;
-			case r:
+			case 'r':
 				break;
 			}
 			
