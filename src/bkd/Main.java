@@ -21,13 +21,12 @@ public class Main {
 			new String[]{"include", "exclude", "media", "nolink", "script"}));
 	private static HashSet<Character> tasks = new HashSet<>(Arrays.asList(
 			new Character[]{'n', 'i', 'j', 'e', 'g'}));// d for dir
-	private static HashSet<String> strs = new HashSet<>(Arrays.asList(
-			new String[] {"i", "r", "q", "u"}));
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	private static int llen = 1;
 	public static int lstart = 1;
 	private static String sl = "/";
 	public static String dir = System.getProperty("user.dir");
+	private static indexend sh = new indexend();
 	private static HashSet<String> lexclude = new HashSet<>();
 	private static HashSet<String> linclude = new HashSet<>();
 	private static HashSet<String> qexclude = new HashSet<>();
@@ -44,20 +43,18 @@ public class Main {
 		String st = s.readLine();
 		s.close();
 		args = st.split(" ");
-		
-		Runtime.getRuntime().addShutdownHook(new shutdown());
 		cmds(args);
 	}
 	static void cmds(String[] args) throws IOException{
 		Queue<Character> tasq = new LinkedList<>();
-		Queue<String> dirq = new LinkedList<>();
 		char mode = 'n';
 		String smode = null;
-		int re = 0;
-		int qre = 0;
-		boolean strnext = false;
-		outer:
+		Queue<Integer> re = new LinkedList<>();
+		Queue<Boolean> qre = new LinkedList<>();
+		//outer:
 		for(int i = 1; i < args.length; i++) {
+			int tre = 0;
+			boolean tqre;
 			args[i] = args[i].toLowerCase();
 			if(args[i].charAt(0)=='-') {
 				if(args[i].charAt(1)=='-') {
@@ -81,53 +78,71 @@ public class Main {
 				if(tasks.contains(mode)) {
 					tasq.add(mode);
 				}
-				strnext = strs.contains(mode) ? true : false;
 			}
 			else{
-				try {
-					if(mode == null || mode == Modes.n)continue outer;
-					smode = Submodes.valueOf(args[i]);
-					continue outer;
-				}catch(IllegalArgumentException ex){}
+				if(sub.contains(args[i])) {
+					if(mode == ' ' || mode == 'n')continue;
+					smode = args[i];
+					if(mode == 's'){}
+					continue;
+				}
 				switch(mode) {
 				case 'n':
 					dir = System.getProperty("user.dir")+dir+sl+"Data"+sl+args[i];
 					smode = null;
+					mode =' ';
 					break;
 				case 'i':
-					if(smode == Submodes.include) {
-						
-					}
-					else if(smode == Submodes.exclude) {
-						
-					}
+					if(smode.equals("include")) linclude.add(args[i]);
+					else if(smode.equals("exclude")) lexclude.add(args[i]);
 					else {
-						
+						if(args[i].matches("\\d+")||args[i].equals("inf")) {
+							if(args[i].equals("inf")) {
+								tre = -2;
+							}
+							else {
+								tre = Integer.parseInt(args[i]);
+								if(tre<0)tre=-2;
+							}
+						}
+						else {
+							System.out.println("Index iterations must be integer: \"" + args[i] + "\"");
+							return;
+						}
 					}
-					break;
-				case 'j':
-					break;
-				case 'e':
 					break;
 				case 'q':
-					break;
-				case 'g':
-					break;
-				case 's':
-					break;
-				case 'r':
+					if(smode.equals("include")) qinclude.add(args[i]);
+					else if(smode.equals("exclude")) qexclude.add(args[i]);
+					else if(args[i].matches("\\d+")||args[i].equals("inf")) {
+						if(args[i].equals("inf")) {
+							tre = -2;
+						}
+						else {
+							tre = Integer.parseInt(args[i]);
+							if(tre<0)tre=-2;
+						}
+					}
 					break;
 				case 'u':
 					break;
+				default:
+					System.out.println("Syntax error at: \"" + args[i] + "\"");
+					return;
 				}
 			}
 		}
+		System.gc();
 		while (!tasq.isEmpty()) {
 			char mod = tasq.poll();
 			switch(mod) {
 			case 'i':
 				load();
-				//map(n);
+				Runtime.getRuntime().addShutdownHook(sh);
+				map(re.poll());
+				Runtime.getRuntime().removeShutdownHook(sh);
+				lstart = 1;
+				llen = 1;
 				break;
 			case 'j':
 				importr();
@@ -370,7 +385,7 @@ public class Main {
 		return url;
 	}
 }
-class shutdown extends Thread{
+class indexend extends Thread{
 	public void run(){
 		try {
 			new File(Main.dir+".q").createNewFile();
