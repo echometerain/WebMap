@@ -14,13 +14,13 @@ import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 public class Main {
 	private static HashSet<Character> modes = new HashSet<>(Arrays.asList(
-			new Character[]{'n', 'i', 'j', 'e', 'g', 'r', 'q', 's', 'u'}));
+			new Character[]{'i', 'j', 'e', 'g', 'r', 'q', 's', 'u'}));
 	private static HashSet<String> lmodes = new HashSet<>(Arrays.asList(
-			new String[]{"name", "index", "json", "export", "graph", "recompute", "query", "scope", "url"}));
+			new String[]{"index", "json", "export", "graph", "recompute", "query", "scope", "url"}));
 	private static HashSet<String> sub = new HashSet<>(Arrays.asList(
 			new String[]{"include", "exclude", "media", "nolink", "script"}));
 	private static HashSet<Character> tasks = new HashSet<>(Arrays.asList(
-			new Character[]{'n', 'i', 'j', 'e', 'g'}));// d for dir
+			new Character[]{'i', 'j', 'e', 'g'}));// d for dir
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	private static int llen = 1;
 	public static int lstart = 1;
@@ -43,18 +43,17 @@ public class Main {
 		String st = s.readLine();
 		s.close();
 		args = st.split(" ");
+		dir = System.getProperty("user.dir")+dir+sl+"Data"+sl+args[0];
 		cmds(args);
 	}
 	static void cmds(String[] args) throws IOException{
-		Queue<Character> tasq = new LinkedList<>();
-		char mode = 'n';
+		HashSet<Character> tasq = new HashSet<>();
+		char mode = ' ';
 		String smode = null;
-		Queue<Integer> re = new LinkedList<>();
-		Queue<Boolean> qre = new LinkedList<>();
+		int re = 0;
+		boolean qre = false;
 		//outer:
 		for(int i = 1; i < args.length; i++) {
-			int tre = 0;
-			boolean tqre;
 			args[i] = args[i].toLowerCase();
 			if(args[i].charAt(0)=='-') {
 				if(args[i].charAt(1)=='-') {
@@ -81,28 +80,27 @@ public class Main {
 			}
 			else{
 				if(sub.contains(args[i])) {
-					if(mode == ' ' || mode == 'n')continue;
+					if(mode == ' ')continue;
 					smode = args[i];
 					if(mode == 's'){}
 					continue;
 				}
 				switch(mode) {
-				case 'n':
-					dir = System.getProperty("user.dir")+dir+sl+"Data"+sl+args[i];
-					smode = null;
-					mode =' ';
-					break;
 				case 'i':
 					if(smode.equals("include")) linclude.add(args[i]);
 					else if(smode.equals("exclude")) lexclude.add(args[i]);
+					else if(smode != null) {
+						System.out.println("Syntax error at: \"" + args[i] + "\"");
+						return;
+					}
 					else {
 						if(args[i].matches("\\d+")||args[i].equals("inf")) {
 							if(args[i].equals("inf")) {
-								tre = -2;
+								re = -2;
 							}
 							else {
-								tre = Integer.parseInt(args[i]);
-								if(tre<0)tre=-2;
+								re = Integer.parseInt(args[i]);
+								if(re<0)re=-2;
 							}
 						}
 						else {
@@ -112,15 +110,20 @@ public class Main {
 					}
 					break;
 				case 'q':
+					qre = true;
 					if(smode.equals("include")) qinclude.add(args[i]);
 					else if(smode.equals("exclude")) qexclude.add(args[i]);
+					else if(smode != null) {
+						System.out.println("Syntax error at: \"" + args[i] + "\"");
+						return;
+					}
 					else if(args[i].matches("\\d+")||args[i].equals("inf")) {
 						if(args[i].equals("inf")) {
-							tre = -2;
+							re = -2;
 						}
 						else {
-							tre = Integer.parseInt(args[i]);
-							if(tre<0)tre=-2;
+							re = Integer.parseInt(args[i]);
+							if(re<0)re=-2;
 						}
 					}
 					break;
@@ -133,13 +136,12 @@ public class Main {
 			}
 		}
 		System.gc();
-		while (!tasq.isEmpty()) {
-			char mod = tasq.poll();
-			switch(mod) {
+		for(char e:tasq) {
+			switch(e) {
 			case 'i':
 				load();
 				Runtime.getRuntime().addShutdownHook(sh);
-				map(re.poll());
+				map(re);
 				Runtime.getRuntime().removeShutdownHook(sh);
 				lstart = 1;
 				llen = 1;
