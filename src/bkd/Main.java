@@ -6,8 +6,6 @@ import org.jsoup.HttpStatusException;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
@@ -22,6 +20,7 @@ public class Main {
 	private static HashSet<Character> tasks = new HashSet<>(Arrays.asList(
 			new Character[]{'i', 'j', 'e', 'g'}));// d for dir
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
+	private static int re = 0;
 	private static int llen = 1;
 	public static int lstart = 1;
 	private static String sl = "/";
@@ -29,8 +28,8 @@ public class Main {
 	private static indexend sh = new indexend();
 	private static HashSet<String> lexclude = new HashSet<>();
 	private static HashSet<String> linclude = new HashSet<>();
-	private static HashSet<String> qexclude = new HashSet<>();
-	private static HashSet<String> qinclude = new HashSet<>();
+	//private static HashSet<String> qexclude = new HashSet<>();
+	//private static HashSet<String> qinclude = new HashSet<>();
 	public static void main(String[] args) throws IOException {
 		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
@@ -43,15 +42,14 @@ public class Main {
 		String st = s.readLine();
 		s.close();
 		args = st.split(" ");
-		dir = System.getProperty("user.dir")+dir+sl+"Data"+sl+args[0];
+		dir = dir+args[0];
 		cmds(args);
 	}
 	static void cmds(String[] args) throws IOException{
 		HashSet<Character> tasq = new HashSet<>();
 		char mode = ' ';
 		String smode = null;
-		int re = 0;
-		boolean qre = false;
+		//boolean qre = false;
 		//outer:
 		for(int i = 1; i < args.length; i++) {
 			args[i] = args[i].toLowerCase();
@@ -87,14 +85,8 @@ public class Main {
 				}
 				switch(mode) {
 				case 'i':
-					if(smode.equals("include")) linclude.add(args[i]);
-					else if(smode.equals("exclude")) lexclude.add(args[i]);
-					else if(smode != null) {
-						System.out.println("Syntax error at: \"" + args[i] + "\"");
-						return;
-					}
-					else {
-						if(args[i].matches("\\d+")||args[i].equals("inf")) {
+					if(smode == null) {
+						if(isint(args[i])||args[i].equals("inf")) {
 							if(args[i].equals("inf")) {
 								re = -2;
 							}
@@ -108,26 +100,18 @@ public class Main {
 							return;
 						}
 					}
-					break;
-				case 'q':
-					qre = true;
-					if(smode.equals("include")) qinclude.add(args[i]);
-					else if(smode.equals("exclude")) qexclude.add(args[i]);
-					else if(smode != null) {
+					else if(smode.equals("include")) linclude.add(args[i]);
+					else if(smode.equals("exclude")) lexclude.add(args[i]);
+					else{
 						System.out.println("Syntax error at: \"" + args[i] + "\"");
 						return;
 					}
-					else if(args[i].matches("\\d+")||args[i].equals("inf")) {
-						if(args[i].equals("inf")) {
-							re = -2;
-						}
-						else {
-							re = Integer.parseInt(args[i]);
-							if(re<0)re=-2;
-						}
-					}
+					break;
+				case 'q':
 					break;
 				case 'u':
+					list.put(llen, args[i]);
+					llen++;
 					break;
 				default:
 					System.out.println("Syntax error at: \"" + args[i] + "\"");
@@ -141,10 +125,8 @@ public class Main {
 			case 'i':
 				load();
 				Runtime.getRuntime().addShutdownHook(sh);
-				map(re);
+				map();
 				Runtime.getRuntime().removeShutdownHook(sh);
-				lstart = 1;
-				llen = 1;
 				break;
 			case 'j':
 				importr();
@@ -166,6 +148,7 @@ public class Main {
 	static boolean query(String url) {
 		return false;
 	}
+
 	static int recoverq() throws IOException{
 		int start = 1;
 		BufferedReader map = new BufferedReader(new FileReader(dir+".map"));
@@ -189,11 +172,8 @@ public class Main {
 			BufferedReader q = new BufferedReader(new FileReader(dir+".q"));
 			String qst = q.readLine();
 			q.close();
-			if(qst.matches("\\d+")) {
+			if(isint(qst)) {
 				lstart = Integer.parseInt(qst);
-			}
-			else if(qst.equals("-2")) {
-				lstart = -2;
 			}
 			else{
 				System.out.println("Queue location file currupted. Reprocessing...");
@@ -263,7 +243,7 @@ public class Main {
 			count++;
 			for(String e2:s.split(" ")) {
 				if(e2.equals("")) continue;
-				if(e2.matches("\\d+")){
+				if(isint(e2)){
 					st += "\""+list.get(Integer.parseInt(e2))+"\",";
 				}
 				else{
@@ -283,7 +263,7 @@ public class Main {
 		writer.close();
 		System.out.println("Finished exporting");
 	}
-	static void map(int re) throws IOException{
+	static void map() throws IOException{
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
 		for(long i = 0; i < re && re!=-2; i++) {
@@ -332,6 +312,7 @@ public class Main {
 		}
 		writein.close();
 		writemap.close();
+		sh.start();
 	}
 	static String urlmerge(String url, String lurl) {
 		if(url.length() == 0) return lurl;
@@ -385,6 +366,12 @@ public class Main {
 		url = lurl + url;
 		//System.out.println(url);
 		return url;
+	}
+	static boolean isint(String x) {
+		try {
+			Integer.parseInt(x);
+			return true;
+		}catch(NumberFormatException e) { return false;}
 	}
 }
 class indexend extends Thread{
