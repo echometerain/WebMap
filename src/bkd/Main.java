@@ -5,31 +5,42 @@ import org.jsoup.nodes.Element;
 import org.jsoup.HttpStatusException;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 public class Main {
-	private static HashSet<Character> modes = new HashSet<>(Arrays.asList(
-			new Character[]{'i', 'j', 'e', 'g', 'r', 'q', 's', 'u'}));
-	private static HashSet<String> lmodes = new HashSet<>(Arrays.asList(
-			new String[]{"index", "json", "export", "graph", "recompute", "query", "scope", "url"}));
 	private static HashSet<String> sub = new HashSet<>(Arrays.asList(
 			new String[]{"include", "exclude", "media", "nolink", "script"}));
 	private static HashSet<Character> tasks = new HashSet<>(Arrays.asList(
-			new Character[]{'i', 'j', 'e', 'g'}));// d for dir
+			new Character[]{'i', 'j', 'e', 'g'}));
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
+	public static HashMap<String, Character> modes = new HashMap<>();
 	private static int re = 0;
 	private static int llen = 1;
 	public static int lstart = 1;
 	private static String sl = "/";
 	public static String dir = System.getProperty("user.dir");
 	private static indexend sh = new indexend();
+	private static String agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:84.0) Gecko/20100101 Firefox/84.0";
 	private static HashSet<String> lexclude = new HashSet<>();
 	private static HashSet<String> linclude = new HashSet<>();
 	//private static HashSet<String> qexclude = new HashSet<>();
 	//private static HashSet<String> qinclude = new HashSet<>();
+	static {
+		modes.put("index", 'i');
+		modes.put("json", 'j');
+		modes.put("export", 'e');
+		modes.put("graph", 'g');
+		modes.put("recompute", 'r');
+		modes.put("query", 'q');
+		modes.put("scope", 's');
+		modes.put("url", 'u');
+		modes.put("grep", 'G');
+		modes.put("dir", 'd');
+	}
 	public static void main(String[] args) throws IOException {
 		
 		if(System.getProperty("os.name").startsWith("Windows")) sl = "\\";
@@ -55,7 +66,7 @@ public class Main {
 			args[i] = args[i].toLowerCase();
 			if(args[i].charAt(0)=='-') {
 				if(args[i].charAt(1)=='-') {
-					if(lmodes.contains(args[i].substring(2))){
+					if(modes.containsKey(args[i].substring(2))){
 						mode = args[i].charAt(2);
 					}
 					else {
@@ -63,7 +74,7 @@ public class Main {
 						return;
 					}
 				}else {
-					if(modes.contains(args[i].charAt(1))) {
+					if(modes.containsValue(args[i].charAt(1))) {
 						mode = args[i].charAt(1);
 					}
 					else {
@@ -119,6 +130,7 @@ public class Main {
 				}
 			}
 		}
+		if(tasq.contains('r')) remove();
 		System.gc();
 		for(char e:tasq) {
 			switch(e) {
@@ -134,9 +146,7 @@ public class Main {
 			case 'e':
 				export();
 				break;
-			case 'g':
-				break;
-			case 'r':
+			case 'q':
 				break;
 			}
 			
@@ -148,7 +158,11 @@ public class Main {
 	static boolean query(String url) {
 		return false;
 	}
-
+	static void remove() {
+		if(new File(dir+".index").isFile()) new File(dir+".index").delete();
+		if(new File(dir+".map").isFile()) new File(dir+".map").delete();
+		if(new File(dir+".q").isFile()) new File(dir+".q").delete();
+	}
 	static int recoverq() throws IOException{
 		int start = 1;
 		BufferedReader map = new BufferedReader(new FileReader(dir+".map"));
@@ -284,7 +298,10 @@ public class Main {
 			HashSet<String> tlist = new HashSet<>();
 			String html;
 			try {
-				html = Jsoup.connect(turl).get().html();
+				html = Jsoup.connect(turl).followRedirects(true)
+						.userAgent(agent)
+						.ignoreHttpErrors(true)
+						.get().html();
 			} catch(HttpStatusException ex) {
 				System.out.println("Unable to reach: " + turl);
 				i--;
