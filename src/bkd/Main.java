@@ -32,6 +32,7 @@ public class Main {
 	//private static HashSet<String> qexclude = new HashSet<>();
 	//private static HashSet<String> qinclude = new HashSet<>();
 	static {
+		modes.put("test", 't');
 		modes.put("index", 'i');
 		modes.put("json", 'j');
 		modes.put("export", 'e');
