@@ -1,6 +1,7 @@
 package bkd;
 import java.io.*;
 import org.jsoup.Jsoup;
+import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Element;
 import org.jsoup.HttpStatusException;
 
@@ -19,6 +20,7 @@ public class Main {
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	public static HashMap<String, Character> modes = new HashMap<>();
 	private static int re = 0;
+	private static int lre = 0;
 	private static int llen = 1;
 	public static int lstart = 1;
 	private static String sl = "/";
@@ -35,10 +37,9 @@ public class Main {
 		modes.put("export", 'e');
 		modes.put("graph", 'g');
 		modes.put("recompute", 'r');
-		modes.put("query", 'q');
 		modes.put("scope", 's');
 		modes.put("url", 'u');
-		modes.put("grep", 'G');
+		modes.put("log", 'l');
 		modes.put("dir", 'd');
 	}
 	public static void main(String[] args) throws IOException {
@@ -123,7 +124,7 @@ public class Main {
 						return;
 					}
 					break;
-				case 'q':
+				case 'l':
 					break;
 				case 'u':
 					if(args[i].charAt(args[i].length()-1) == '/')args[i]=args[i].substring(0, args[i].length()-1);
@@ -134,6 +135,7 @@ public class Main {
 					System.out.println("Syntax error at: \"" + args[i] + "\"");
 					return;
 				}
+				if(smode == null) mode = ' ';
 			}
 		}
 		System.gc();
@@ -271,7 +273,7 @@ public class Main {
 					return;
 				}
 			}
-			if(st.charAt(st.length()-1)==',')st.substring(0, st.length()-1);
+			if(!s.equals(""))st = st.substring(0, st.length()-1);
 			st += "],\n";
 		}
 		reader.close();
@@ -285,6 +287,9 @@ public class Main {
 	static void map() throws IOException{
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
+		for(int i = 1; i <= list.size(); i++) {
+			writein.append(list.get(i)+"\n");
+		}
 		for(long i = 0; i < re && re!=-2; i++) {
 			if(!list.containsKey(lstart)) {
 				System.out.println("Reached the end");
@@ -309,9 +314,12 @@ public class Main {
 						.get().html();
 			} catch(HttpStatusException ex) {
 				System.out.println("Unable to reach: " + turl);
-				i--;
+				writemap.append("\n");
 				continue;
 				//return;
+			} catch(UnsupportedMimeTypeException ex) {
+				writemap.append("\n");
+				continue;
 			}
 			for(Element e:Jsoup.parse(html).select("a[href]")) {
 				String nlink = urlmerge(e.attr("href"), turl);
