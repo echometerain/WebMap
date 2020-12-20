@@ -82,6 +82,11 @@ public class Main {
 						return;
 					}
 				}
+				if(mode == 'r') {
+					mode = ' ';
+					remove();
+					continue;
+				}
 				smode = null;
 				if(tasks.contains(mode)) {
 					tasq.add(mode);
@@ -121,6 +126,7 @@ public class Main {
 				case 'q':
 					break;
 				case 'u':
+					if(args[i].charAt(args[i].length()-1) == '/')args[i]=args[i].substring(0, args[i].length()-1);
 					list.put(llen, args[i]);
 					llen++;
 					break;
@@ -130,7 +136,6 @@ public class Main {
 				}
 			}
 		}
-		if(tasq.contains('r')) remove();
 		System.gc();
 		for(char e:tasq) {
 			switch(e) {
@@ -159,9 +164,9 @@ public class Main {
 		return false;
 	}
 	static void remove() {
-		if(new File(dir+".index").isFile()) new File(dir+".index").delete();
-		if(new File(dir+".map").isFile()) new File(dir+".map").delete();
-		if(new File(dir+".q").isFile()) new File(dir+".q").delete();
+		new File(dir+".index").delete();
+		new File(dir+".map").delete();
+		new File(dir+".q").delete();
 	}
 	static int recoverq() throws IOException{
 		int start = 1;
@@ -311,8 +316,7 @@ public class Main {
 			for(Element e:Jsoup.parse(html).select("a[href]")) {
 				String nlink = urlmerge(e.attr("href"), turl);
 				if(nlink.equals(""))continue;
-				String lsub = nlink.substring(0, nlink.length()-1);
-				if(list.containsValue(lsub)) nlink = lsub;
+				if(nlink.charAt(nlink.length()-1) == '/')nlink=nlink.substring(0, nlink.length()-1);
 				tlist.add(nlink);
 			}
 			//System.out.println(tlist.size());
@@ -333,9 +337,13 @@ public class Main {
 	}
 	static String urlmerge(String url, String lurl) {
 		if(url.length() == 0) return lurl;
+		if(lurl.charAt(lurl.length()-1) == '/')lurl=lurl.substring(0, lurl.length()-1);
+		if(url.charAt(url.length()-1) == '/')url=url.substring(0, url.length()-1);
 		String[] parts = lurl.split("/");
 		while(true) {
-			if(url.charAt(0) == '\r'||url.charAt(0) == '\t'||url.charAt(0) == '\n'||url.charAt(0) == ' ') {
+			if(url.length() == 0) return lurl;
+			char ch = url.charAt(0);
+			if(ch == '\r'||ch == '\t'||ch == '\n'||ch == ' ') {
 				url = url.substring(1);
 			}
 			else break;
@@ -352,20 +360,20 @@ public class Main {
 			lurl = parts[0]+"//"+parts[2];
 		}
 		else if(url.charAt(0) == '.') {
-			if(parts.length>3 && parts[parts.length-1].contains(".")) {
+			if(parts.length>3 && (parts[parts.length-1].contains(".") || parts[parts.length-1].contains("?") || parts[parts.length-1].contains("#"))) {
 				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()));
 				parts = lurl.split("/");
 			}
 			if(url.startsWith("./")) {
-				url = url.substring(2, url.length());
+				url = url.substring(2);
 			}
 			else if(url.startsWith("../../")) {
 				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+parts[parts.length-2].length()+2));
-				url = url.substring(6, url.length());
+				url = url.substring(6);
 			}
 			else if(url.startsWith("../")) {
 				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
-				url = url.substring(3, url.length());
+				url = url.substring(3);
 			}
 			else return "";
 		}
@@ -374,14 +382,7 @@ public class Main {
 				lurl = lurl.substring(0, lurl.length()-(parts[parts.length-1].length()+1));
 			}
 		}
-		if(lurl.charAt(lurl.length()-1) == '/') {
-			lurl = lurl.substring(0, lurl.length()-1);
-		}
-		if(url.length()>0 && url.charAt(0) != '/') {
-			url = "/"+ url;
-		}
 		url = lurl + url;
-		//System.out.println(url);
 		return url;
 	}
 	static boolean isint(String x) {
