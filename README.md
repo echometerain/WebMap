@@ -6,25 +6,24 @@ A program that takes a webpage, takes all of its embeded links, and recursively 
 
 Compiled .jar:
 
-    java -jar WebCrawler.jar (SessionName) (Mode) (Iterations) (URLs)
+    java -jar WebCrawler.jar (SessionName) (Mode) (Submode if available)
 
-Compiled .exe:
-
-    crawl (SessionName) (Mode) (Iterations) (URLs)
-  
 A session can be named whatever you want, and inputting the name of a previous session would use that session (if it exists in /Data).
-
-Iterations must be integer. It determines how many sites the program will process.
 
 Multiple URLs could be placed at the end with a space seperator. It adds urls to a new or existing queue.
  
 ## Modes
  - -i index (this will autosave files in Data directory)
+ Iterations is written after and must be integer (or "inf").
+ 
+ It determines how many sites the program will process.
+ 
+ No iteration value, "inf" or any negative number would trigger infinite processing (you can exit anytime).
  - -e export .json (stored in (session name).json in \Data)
  - -j import .json
- - -r recompute (not implemented)
- - -s scopes (not implemented)
+ - -r recompute (delete all files and reprocess)
  - -q query (not implemented)
+ - -s scopes (not implemented)
  - -g graph (not implemented)
  
 # How to read files
