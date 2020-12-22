@@ -1,6 +1,6 @@
 # WebMap
 
-A program that takes a webpage, takes all of its embeded links, and recursively derives more webpages with BFS.
+A program that takes a webpage, takes all of its embeded links, and derives more webpages.
 
 ## How to run
 
