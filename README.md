@@ -22,8 +22,7 @@ Multiple URLs could be placed at the end with a space seperator. It adds urls to
     It determines how many sites the program will process.
  
     No iteration value, "inf" or any negative number would trigger infinite processing (you can exit anytime).
- 
-    Submodes:
+
     - include - only process URLs that matches your regex
     - exclude - exclude all URLs from processing that matches your regex
 
@@ -33,7 +32,6 @@ Multiple URLs could be placed at the end with a space seperator. It adds urls to
  - -r recompute (delete all files and reprocess)
  - -q query displays certain URLs onto console
     
-    Submodes:
     - include - only display URLs that matches your regex
     - exclude - do not display URLs that matches your regex
 
@@ -58,3 +56,4 @@ Lets say the fifth line of .map is "8 2 10 12". This means that the fifth URL in
  - https://github.com/jhy/jsoup/ MIT License
  - https://github.com/apache/commons-collections Apache 2.0 Licence
  - Requires JDK 14 / Java SE 14 to run
+ - I regret not using jcommander
