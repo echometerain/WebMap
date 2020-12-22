@@ -10,8 +10,6 @@ Compiled .jar:
 
 A session can be named whatever you want, and inputting the name of a previous session would use that session (if it exists in /Data).
 
-Multiple URLs could be placed at the end with a space seperator. It adds urls to a new or existing queue.
- 
 ## Modes
  - -u URLs (necessary for indexing)
     
