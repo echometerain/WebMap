@@ -21,17 +21,18 @@ public class Main {
 	public static HashMap<String, Character> modes = new HashMap<>();
 	private static HashSet<String> uset = new HashSet<>();
 	private static int re = -2;
-	private static int qre = 0;
+	private static int qre = -2;
+	public static boolean qmode = false;
 	private static int llen = 1;
 	public static int lstart = 1;
 	private static String sl = "/";
 	public static String dir = System.getProperty("user.dir");
 	private static indexend sh = new indexend();
 	private static String agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:84.0) Gecko/20100101 Firefox/84.0";
-	private static HashSet<String> lexclude = new HashSet<>();
-	private static HashSet<String> linclude = new HashSet<>();
-	//private static HashSet<String> qexclude = new HashSet<>();
-	//private static HashSet<String> qinclude = new HashSet<>();
+	private static String lexclude = null;
+	private static String linclude = null;
+	private static String qexclude = null;
+	private static String qinclude = null;
 	static {
 		modes.put("index", 'i');
 		modes.put("json", 'j');
@@ -40,8 +41,7 @@ public class Main {
 		modes.put("recompute", 'r');
 		modes.put("scope", 's');
 		modes.put("url", 'u');
-		modes.put("log", 'l');
-		modes.put("dir", 'd');
+		modes.put("query", 'q');
 	}
 	public static void main(String[] args) throws IOException {
 		
@@ -118,14 +118,36 @@ public class Main {
 							return;
 						}
 					}
-					else if(smode.equals("include")) linclude.add(args[i]);
-					else if(smode.equals("exclude")) lexclude.add(args[i]);
+					else if(smode.equals("include")) linclude = args[i];
+					else if(smode.equals("exclude")) lexclude = args[i];
 					else{
-						System.out.println("Syntax error at: \"" + args[i] + "\"");
+						System.out.println("Syntax error at: \"" + args[i-1] + "\"");
 						return;
 					}
 					break;
-				case 'l':
+				case 'q':
+					qmode = true;
+					if(smode == null) {
+						if(isint(args[i])||args[i].equals("inf")) {
+							if(args[i].equals("inf")) {
+								qre = -2;
+							}
+							else {
+								qre = Integer.parseInt(args[i]);
+								if(qre<0)qre=-2;
+							}
+						}
+						else {
+							System.out.println("Index iterations must be integer: \"" + args[i] + "\"");
+							return;
+						}
+					}
+					else if(smode.equals("include")) qinclude = args[i];
+					else if(smode.equals("exclude")) qexclude = args[i];
+					else{
+						System.out.println("Syntax error at: \"" + args[i-1] + "\"");
+						return;
+					}
 					break;
 				case 'u':
 					if(args[i].charAt(args[i].length()-1) == '/')args[i]=args[i].substring(0, args[i].length()-1);
@@ -149,16 +171,10 @@ public class Main {
 		if(tasq.contains('e')) {
 			export();
 		}
-		if(tasq.contains('l')) {
+		if(tasq.contains('q')) {
 			
 		}
 		
-	}
-	static boolean legal(String url) {
-		return false;
-	}
-	static boolean query(String url) {
-		return false;
 	}
 	static void remove() {
 		new File(dir+".index").delete();
@@ -327,9 +343,14 @@ public class Main {
 			//System.out.println(tlist.size());
 			for(String e:tlist) {
 				if(!list.containsValue(e)) {
-					list.put(llen, e);
-					llen++;
-					writein.append(e+"\n");
+					if((linclude == null || e.matches(linclude)) || (lexclude == null || !e.matches(lexclude))){
+						list.put(llen, e);
+						llen++;
+						writein.append(e+"\n");
+					}
+					if(qmode == true && (qinclude == null || e.matches(qinclude)) || (qexclude == null || !e.matches(qexclude))){
+						System.out.println(e);
+					}
 				}
 				writemap.append(list.getKey(e)+" ");
 			}
