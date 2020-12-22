@@ -13,16 +13,30 @@ A session can be named whatever you want, and inputting the name of a previous s
 Multiple URLs could be placed at the end with a space seperator. It adds urls to a new or existing queue.
  
 ## Modes
+ - -u URLs (necessary for indexing)
+    
  - -i index (this will autosave files in Data directory)
- Iterations is written after and must be integer (or "inf").
+    
+    Iterations is written after and must be integer (or "inf").
  
- It determines how many sites the program will process.
+    It determines how many sites the program will process.
  
- No iteration value, "inf" or any negative number would trigger infinite processing (you can exit anytime).
+    No iteration value, "inf" or any negative number would trigger infinite processing (you can exit anytime).
+ 
+    Submodes:
+    - include - only process URLs that matches your regex
+    - exclude - exclude all URLs from processing that matches your regex
+
+
  - -e export .json (stored in (session name).json in \Data)
  - -j import .json
  - -r recompute (delete all files and reprocess)
- - -q query (not implemented)
+ - -q query displays certain URLs onto console
+    
+    Submodes:
+    - include - only display URLs that matches your regex
+    - exclude - do not display URLs that matches your regex
+
  - -s scopes (not implemented)
  - -g graph (not implemented)
  
