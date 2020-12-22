@@ -19,8 +19,9 @@ public class Main {
 			new Character[]{'i', 'j', 'e', 'g'}));
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	public static HashMap<String, Character> modes = new HashMap<>();
-	private static int re = 0;
-	private static int lre = 0;
+	private static HashSet<String> uset = new HashSet<>();
+	private static int re = -2;
+	private static int qre = 0;
 	private static int llen = 1;
 	public static int lstart = 1;
 	private static String sl = "/";
@@ -128,8 +129,7 @@ public class Main {
 					break;
 				case 'u':
 					if(args[i].charAt(args[i].length()-1) == '/')args[i]=args[i].substring(0, args[i].length()-1);
-					list.put(llen, args[i]);
-					llen++;
+					uset.add(args[i]);
 					break;
 				default:
 					System.out.println("Syntax error at: \"" + args[i] + "\"");
@@ -139,25 +139,20 @@ public class Main {
 			}
 		}
 		System.gc();
-		for(char e:tasq) {
-			switch(e) {
-			case 'i':
-				load();
-				Runtime.getRuntime().addShutdownHook(sh);
-				map();
-				Runtime.getRuntime().removeShutdownHook(sh);
-				break;
-			case 'j':
-				importr();
-				break;
-			case 'e':
-				export();
-				break;
-			case 'q':
-				break;
-			}
+		if(tasq.contains('i')) {
+			load();
+			map();
+		}
+		if(tasq.contains('j')) {
+			importr();
+		}
+		if(tasq.contains('e')) {
+			export();
+		}
+		if(tasq.contains('l')) {
 			
 		}
+		
 	}
 	static boolean legal(String url) {
 		return false;
@@ -170,14 +165,12 @@ public class Main {
 		new File(dir+".map").delete();
 		new File(dir+".q").delete();
 	}
-	static int recoverq() throws IOException{
-		int start = 1;
+	static void recoverq() throws IOException{
 		BufferedReader map = new BufferedReader(new FileReader(dir+".map"));
 		while(map.readLine() != null) {
 			lstart++;
 		}
 		map.close();
-		return start;
 	}
 	static void load() throws IOException{
 		if(!new File(dir+".index").isFile()) {
@@ -187,7 +180,7 @@ public class Main {
 		}
 		if(!new File(dir+".q").isFile() && lstart == 1) {
 			System.out.println("Queue location file not found. Reprocessing...");
-			lstart = recoverq();
+			recoverq();
 		}
 		else if(lstart == 1){
 			BufferedReader q = new BufferedReader(new FileReader(dir+".q"));
@@ -198,7 +191,7 @@ public class Main {
 			}
 			else{
 				System.out.println("Queue location file currupted. Reprocessing...");
-				lstart = recoverq();
+				recoverq();
 			}
 		}
 		if(!new File(dir+".map").isFile()) {
@@ -229,8 +222,8 @@ public class Main {
 		String[] arr = st.split("([\\[\\]])");
 		for(int i = 0; i < arr.length-1; i+=2) {
 			if(i==0) {
-				list.put(lstart, arr[i].split("\"")[1]);
-				lstart++;
+				list.put(llen, arr[i].split("\"")[1]);
+				llen++;
 				writein.append(arr[i].split("\"")[1]+"\n");
 			}
 			String[] ar2 = arr[i+1].split("\"");
@@ -238,8 +231,8 @@ public class Main {
 			for(int ii = 1; ii < ar2.length-1; ii+=2) {
 				llinks.add(ar2[ii]);
 				if(!list.containsValue(ar2[ii])) {
-					list.put(lstart, ar2[ii]);
-					lstart++;
+					list.put(llen, ar2[ii]);
+					llen++;
 					writein.append(ar2[ii]+"\n");
 				}
 			}
@@ -285,14 +278,18 @@ public class Main {
 		System.out.println("Finished exporting");
 	}
 	static void map() throws IOException{
+		Runtime.getRuntime().addShutdownHook(sh);
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
-		for(int i = 1; i <= list.size(); i++) {
-			writein.append(list.get(i)+"\n");
+		for(String e:uset) {
+			writein.append(e);
+			list.put(llen, e);
+			llen++;
 		}
-		for(long i = 0; i < re && re!=-2; i++) {
+		for(long i = 0; i < re || re==-2; i++) {
 			if(!list.containsKey(lstart)) {
 				System.out.println("Reached the end");
+				System.out.println(list.keySet());
 				writein.close();
 				writemap.close();
 				return;
@@ -337,10 +334,16 @@ public class Main {
 				writemap.append(list.getKey(e)+" ");
 			}
 			writemap.append("\n");
-			System.out.print((i+1)+"/"+re+" complete\r");
+			if(re == -2) {
+				System.out.print((i+1)+" complete\r");
+			}
+			else {
+				System.out.print((i+1)+"/"+re+" complete\r");
+			}
 		}
 		writein.close();
 		writemap.close();
+		Runtime.getRuntime().removeShutdownHook(sh);
 		sh.start();
 	}
 	static String urlmerge(String url, String lurl) {
