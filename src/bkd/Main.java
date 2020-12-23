@@ -43,6 +43,7 @@ public class Main {
 		modes.put("scope", 's');
 		modes.put("url", 'u');
 		modes.put("query", 'q');
+		modes.put("merge", 'm');
 	}
 	public static void main(String[] args) throws IOException {
 		
