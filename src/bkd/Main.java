@@ -16,13 +16,14 @@ public class Main {
 	private static HashSet<String> sub = new HashSet<>(Arrays.asList(
 			new String[]{"include", "exclude", "media", "nolink", "script"}));
 	private static HashSet<Character> tasks = new HashSet<>(Arrays.asList(
-			new Character[]{'i', 'j', 'e', 'g'}));
+			new Character[]{'i', 'j', 'e', 'g', 'q'}));
 	public static BidiMap<Integer, String> list = new DualHashBidiMap<>();
 	public static HashMap<String, Character> modes = new HashMap<>();
 	private static HashSet<String> uset = new HashSet<>();
 	private static int re = -2;
 	private static int qre = -2;
 	public static boolean qmode = false;
+	public static boolean qonly = false;
 	private static int llen = 1;
 	public static int lstart = 1;
 	private static String sl = "/";
@@ -126,6 +127,7 @@ public class Main {
 					}
 					break;
 				case 'q':
+					qonly = true;
 					qmode = true;
 					if(smode == null) {
 						if(isint(args[i])||args[i].equals("inf")) {
@@ -162,6 +164,13 @@ public class Main {
 		}
 		System.gc();
 		if(tasq.contains('i')) {
+			qonly = false;
+			load();
+			map();
+		}
+		else if(tasq.contains('q')) {
+			qmode = true;
+			qonly = true;
 			load();
 			map();
 		}
@@ -170,9 +179,6 @@ public class Main {
 		}
 		if(tasq.contains('e')) {
 			export();
-		}
-		if(tasq.contains('q')) {
-			
 		}
 		
 	}
@@ -297,8 +303,9 @@ public class Main {
 		Runtime.getRuntime().addShutdownHook(sh);
 		BufferedWriter writemap = new BufferedWriter(new FileWriter(dir + ".map", true));
 		BufferedWriter writein = new BufferedWriter(new FileWriter(dir + ".index", true));
+		if(qonly) writemap = writein = null;
 		for(String e:uset) {
-			writein.append(e);
+			if(!qonly)writein.append(e);
 			list.put(llen, e);
 			llen++;
 		}
@@ -306,16 +313,20 @@ public class Main {
 			if(!list.containsKey(lstart)) {
 				System.out.println("Reached the end");
 				System.out.println(list.keySet());
-				writein.close();
-				writemap.close();
+				if(!qonly) {
+					writein.close();
+					writemap.close();
+				}
 				return;
 			}
 			String turl = list.get(lstart);
 			//System.out.println(turl);
 			lstart++;
 			if(turl == null) {
-				writein.close();
-				writemap.close();
+				if(!qonly) {
+					writein.close();
+					writemap.close();
+				}
 				return;
 			}
 			HashSet<String> tlist = new HashSet<>();
@@ -327,11 +338,11 @@ public class Main {
 						.get().html();
 			} catch(HttpStatusException ex) {
 				System.out.println("Unable to reach: " + turl);
-				writemap.append("\n");
+				if(!qonly)writemap.append("\n");
 				continue;
 				//return;
 			} catch(UnsupportedMimeTypeException ex) {
-				writemap.append("\n");
+				if(!qonly)writemap.append("\n");
 				continue;
 			}
 			for(Element e:Jsoup.parse(html).select("a[href]")) {
@@ -346,15 +357,25 @@ public class Main {
 					if((linclude == null || e.matches(linclude)) || (lexclude == null || !e.matches(lexclude))){
 						list.put(llen, e);
 						llen++;
-						writein.append(e+"\n");
+						if(!qonly)writein.append(e+"\n");
 					}
-					if(qmode == true && (qinclude == null || e.matches(qinclude)) || (qexclude == null || !e.matches(qexclude))){
-						System.out.println(e);
+					if(qmode) {
+						if((qinclude == null || e.matches(qinclude)) || (qexclude == null || !e.matches(qexclude))){
+							if(qre == 0) {
+								if(!qonly) {
+									writein.close();
+									writemap.close();
+								}
+								return;
+							}
+							if(qre != -2) qre--;
+							System.out.println(e);
+						}
 					}
 				}
-				writemap.append(list.getKey(e)+" ");
+				if(!qonly)writemap.append(list.getKey(e)+" ");
 			}
-			writemap.append("\n");
+			if(!qonly)writemap.append("\n");
 			if(re == -2) {
 				System.out.print((i+1)+" complete\r");
 			}
@@ -362,8 +383,10 @@ public class Main {
 				System.out.print((i+1)+"/"+re+" complete\r");
 			}
 		}
-		writein.close();
-		writemap.close();
+		if(!qonly) {
+			writein.close();
+			writemap.close();
+		}
 		Runtime.getRuntime().removeShutdownHook(sh);
 		sh.start();
 	}
@@ -431,7 +454,7 @@ class indexend extends Thread{
 			FileWriter f = new FileWriter(Main.dir+".q");
 			f.append(Integer.toString(Main.lstart));
 			f.close();
-		} catch(IOException ex) {}
+		} catch(IOException ignore) {}
 		
 	}
 }
