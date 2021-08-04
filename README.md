@@ -1,6 +1,8 @@
 # WebMap
 
-A program that takes a webpage, takes all of its embeded links, and derives more webpages.
+stupid java spider
+
+# I'm never going to update it
 
 ## How to run
 
